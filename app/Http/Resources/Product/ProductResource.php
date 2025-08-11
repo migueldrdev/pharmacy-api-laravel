@@ -63,7 +63,7 @@ class ProductResource extends JsonResource
                 return $this->storageCondition->label;
             }),
             'image' => $fullImageUrl,
-            // status
+            'status' => $this->active,
         ];
     }
 }

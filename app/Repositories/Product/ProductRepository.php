@@ -4,7 +4,6 @@ namespace App\Repositories\Product;
 
 use App\Models\Product;
 use Carbon\Carbon;
-use Illuminate\Http\UploadedFile;
 
 class ProductRepository
 {
