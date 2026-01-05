@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductPresentation\StoreProductPresentationRequest;
 use App\Http\Requests\ProductPresentation\UpdateProductPresentationRequest;
@@ -24,14 +25,18 @@ class ProductPresentationController extends Controller
     {
         try {
             $productPresentations = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de presentaciones de producto',
+            return ResponseHelper::success(
+                data: ProductPresentationResource::collection($productPresentations),
                 message: 'Consulta exitosa',
-                data: ProductPresentationResource::collection($productPresentations)
+                title: 'Listado de presentaciones de producto'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -41,26 +46,29 @@ class ProductPresentationController extends Controller
             $data = $request->validated();
             // No user_created para ProductPresentation según tu esquema
             $productPresentation = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new ProductPresentationResource($productPresentation),
+                message: 'Presentación de producto creada exitosamente',
                 title: 'Presentación de producto creada',
-                message: 'Éxito',
-                data: new ProductPresentationResource($productPresentation)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear la presentación de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(ProductPresentation $productPresentation)
     {
-        return responseApi(true, 'Presentación de producto', 'Consulta exitosa', new ProductPresentationResource($productPresentation));
+        return ResponseHelper::success(
+            data: new ProductPresentationResource($productPresentation),
+            message: 'Consulta exitosa',
+            title: 'Presentación de producto'
+        );
     }
 
     public function update(UpdateProductPresentationRequest $request, ProductPresentation $productPresentation)
@@ -69,19 +77,17 @@ class ProductPresentationController extends Controller
             $data = $request->validated();
             // No user_updated para ProductPresentation según tu esquema
             $updated = $this->service->update($productPresentation, $data);
-            return responseApi(
-                code: 200,
-                title: 'Presentación de producto actualizada',
+            return ResponseHelper::success(
+                data: new ProductPresentationResource($updated),
                 message: 'Presentación de producto actualizada correctamente',
-                data: new ProductPresentationResource($updated)
+                title: 'Presentación de producto actualizada'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar la presentación de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,14 +96,16 @@ class ProductPresentationController extends Controller
     {
         try {
             $this->service->delete($productPresentation); // No se pasa userId aquí
-            return responseApi(true, 'Presentación de producto eliminada', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Presentación de producto eliminada correctamente',
+                title: 'Presentación de producto eliminada'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar la presentación de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -109,14 +117,18 @@ class ProductPresentationController extends Controller
     {
         try {
             $productPresentations = $this->service->getActiveProductPresentationsForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de presentaciones de producto para combo',
+            return ResponseHelper::success(
+                data: ProductPresentationComboResource::collection($productPresentations),
                 message: 'Consulta exitosa',
-                data: ProductPresentationComboResource::collection($productPresentations)
+                title: 'Listado de presentaciones de producto para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

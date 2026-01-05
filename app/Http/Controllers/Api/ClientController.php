@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\StoreClientRequest;
 use App\Http\Requests\Client\UpdateClientRequest;
@@ -25,14 +26,18 @@ class ClientController extends Controller
     {
         try {
             $clients = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de clientes',
+            return ResponseHelper::success(
+                data: ClientResource::collection($clients),
                 message: 'Consulta exitosa',
-                data: ClientResource::collection($clients)
+                title: 'Listado de clientes'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -42,26 +47,29 @@ class ClientController extends Controller
             $data = $request->validated();
             $data['user_created'] = Auth::id();
             $client = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new ClientResource($client),
+                message: 'Cliente creado exitosamente',
                 title: 'Cliente creado',
-                message: 'Éxito',
-                data: new ClientResource($client)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el cliente',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(Client $client)
     {
-        return responseApi(true, 'Cliente', 'Consulta exitosa', new ClientResource($client));
+        return ResponseHelper::success(
+            data: new ClientResource($client),
+            message: 'Consulta exitosa',
+            title: 'Cliente'
+        );
     }
 
     public function update(UpdateClientRequest $request, Client $client)
@@ -70,19 +78,17 @@ class ClientController extends Controller
             $data = $request->validated();
             $data['user_updated'] = Auth::id();
             $updated = $this->service->update($client, $data);
-            return responseApi(
-                code: 200,
-                title: 'Cliente actualizado',
+            return ResponseHelper::success(
+                data: new ClientResource($updated),
                 message: 'Cliente actualizado correctamente',
-                data: new ClientResource($updated)
+                title: 'Cliente actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el cliente',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -91,14 +97,16 @@ class ClientController extends Controller
     {
         try {
             $this->service->delete($client, Auth::id());
-            return responseApi(true, 'Cliente eliminado', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Cliente eliminado correctamente',
+                title: 'Cliente eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el cliente',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +118,18 @@ class ClientController extends Controller
     {
         try {
             $clients = $this->service->getActiveClientsForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de clientes para combo',
+            return ResponseHelper::success(
+                data: ClientComboResource::collection($clients),
                 message: 'Consulta exitosa',
-                data: ClientComboResource::collection($clients)
+                title: 'Listado de clientes para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DocumentType\StoreDocumentTypeRequest;
 use App\Http\Requests\DocumentType\UpdateDocumentTypeRequest;
@@ -25,14 +26,18 @@ class DocumentTypeController extends Controller
     {
         try {
             $documentTypes = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de documento',
+            return ResponseHelper::success(
+                data: DocumentTypeResource::collection($documentTypes),
                 message: 'Consulta exitosa',
-                data: DocumentTypeResource::collection($documentTypes)
+                title: 'Listado de tipos de documento'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -42,26 +47,29 @@ class DocumentTypeController extends Controller
             $data = $request->validated();
             $data['user_created'] = Auth::id();
             $documentType = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new DocumentTypeResource($documentType),
+                message: 'Tipo de documento creado exitosamente',
                 title: 'Tipo de documento creado',
-                message: 'Éxito',
-                data: new DocumentTypeResource($documentType)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el tipo de documento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(DocumentType $documentType)
     {
-        return responseApi(true, 'Tipo de documento', 'Consulta exitosa', new DocumentTypeResource($documentType));
+        return ResponseHelper::success(
+            data: new DocumentTypeResource($documentType),
+            message: 'Consulta exitosa',
+            title: 'Tipo de documento'
+        );
     }
 
     public function update(UpdateDocumentTypeRequest $request, DocumentType $documentType)
@@ -70,19 +78,17 @@ class DocumentTypeController extends Controller
             $data = $request->validated();
             $data['user_updated'] = Auth::id();
             $updated = $this->service->update($documentType, $data);
-            return responseApi(
-                code: 200,
-                title: 'Tipo de documento actualizado',
+            return ResponseHelper::success(
+                data: new DocumentTypeResource($updated),
                 message: 'Tipo de documento actualizado correctamente',
-                data: new DocumentTypeResource($updated)
+                title: 'Tipo de documento actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el tipo de documento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -91,14 +97,16 @@ class DocumentTypeController extends Controller
     {
         try {
             $this->service->delete($documentType, Auth::id());
-            return responseApi(true, 'Tipo de documento eliminado', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Tipo de documento eliminado correctamente',
+                title: 'Tipo de documento eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el tipo de documento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +118,18 @@ class DocumentTypeController extends Controller
     {
         try {
             $documentTypes = $this->service->getActiveDocumentTypesForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de documento para combo',
+            return ResponseHelper::success(
+                data: DocumentTypeComboResource::collection($documentTypes),
                 message: 'Consulta exitosa',
-                data: DocumentTypeComboResource::collection($documentTypes)
+                title: 'Listado de tipos de documento para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

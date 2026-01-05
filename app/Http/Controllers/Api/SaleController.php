@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sale\StoreSaleRequest;
 use App\Http\Requests\Sale\UpdateSaleRequest;
@@ -24,14 +25,18 @@ class SaleController extends Controller
     {
         try {
             $sales = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de ventas',
+            return ResponseHelper::success(
+                data: SaleResource::collection($sales),
                 message: 'Consulta exitosa',
-                data: SaleResource::collection($sales)
+                title: 'Listado de ventas'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -41,26 +46,29 @@ class SaleController extends Controller
             $data = $request->validated();
             $data['user_created'] = Auth::id();
             $sale = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new SaleResource($sale),
+                message: 'Venta creada exitosamente',
                 title: 'Venta creada',
-                message: 'Éxito',
-                data: new SaleResource($sale)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear la venta',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(Sale $sale)
     {
-        return responseApi(true, 'Venta', 'Consulta exitosa', new SaleResource($sale));
+        return ResponseHelper::success(
+            data: new SaleResource($sale),
+            message: 'Consulta exitosa',
+            title: 'Venta'
+        );
     }
 
     public function update(UpdateSaleRequest $request, Sale $sale)
@@ -69,19 +77,17 @@ class SaleController extends Controller
             $data = $request->validated();
             $data['user_updated'] = Auth::id();
             $updated = $this->service->update($sale, $data);
-            return responseApi(
-                code: 200,
-                title: 'Venta actualizada',
+            return ResponseHelper::success(
+                data: new SaleResource($updated),
                 message: 'Venta actualizada correctamente',
-                data: new SaleResource($updated)
+                title: 'Venta actualizada'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar la venta',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,14 +96,16 @@ class SaleController extends Controller
     {
         try {
             $this->service->delete($sale, Auth::id());
-            return responseApi(true, 'Venta eliminada', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Venta eliminada correctamente',
+                title: 'Venta eliminada'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar la venta',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }

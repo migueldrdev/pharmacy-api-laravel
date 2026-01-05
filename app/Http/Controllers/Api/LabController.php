@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Lab\StoreLabRequest;
 use App\Http\Requests\Lab\UpdateLabRequest;
@@ -25,14 +26,18 @@ class LabController extends Controller
     {
         try {
             $labs = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de laboratorios',
+            return ResponseHelper::success(
+                data: LabResource::collection($labs),
                 message: 'Consulta exitosa',
-                data: LabResource::collection($labs)
+                title: 'Listado de laboratorios'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -42,26 +47,29 @@ class LabController extends Controller
             $data = $request->validated();
             $data['user_created'] = Auth::id();
             $lab = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new LabResource($lab),
+                message: 'Laboratorio creado exitosamente',
                 title: 'Laboratorio creado',
-                message: 'Éxito',
-                data: new LabResource($lab)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el laboratorio',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(Lab $lab)
     {
-        return responseApi(true, 'Laboratorio', 'Consulta exitosa', new LabResource($lab));
+        return ResponseHelper::success(
+            data: new LabResource($lab),
+            message: 'Consulta exitosa',
+            title: 'Laboratorio'
+        );
     }
 
     public function update(UpdateLabRequest $request, Lab $lab)
@@ -70,19 +78,17 @@ class LabController extends Controller
             $data = $request->validated();
             $data['user_updated'] = Auth::id();
             $updated = $this->service->update($lab, $data);
-            return responseApi(
-                code: 200,
-                title: 'Laboratorio actualizado',
+            return ResponseHelper::success(
+                data: new LabResource($updated),
                 message: 'Laboratorio actualizado correctamente',
-                data: new LabResource($updated)
+                title: 'Laboratorio actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el laboratorio',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -91,14 +97,16 @@ class LabController extends Controller
     {
         try {
             $this->service->delete($lab, Auth::id());
-            return responseApi(true, 'Laboratorio eliminado', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Laboratorio eliminado correctamente',
+                title: 'Laboratorio eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el laboratorio',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +118,18 @@ class LabController extends Controller
     {
         try {
             $labs = $this->service->getActiveLabsForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de laboratorios para combo',
+            return ResponseHelper::success(
+                data: LabComboResource::collection($labs),
                 message: 'Consulta exitosa',
-                data: LabComboResource::collection($labs)
+                title: 'Listado de laboratorios para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }
