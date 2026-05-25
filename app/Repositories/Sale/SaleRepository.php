@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class SaleRepository
 {
-    public function all()
+    public function all(): Sale
     {
         return Sale::with(['client', 'documentType', 'user', 'saleDetails.product'])->get();
     }
