@@ -4,6 +4,7 @@ namespace App\Repositories\Purchase;
 
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
+use App\Models\Batch;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -44,6 +45,32 @@ class PurchaseRepository extends BaseRepository
         $purchase = parent::create($data);
 
         foreach ($details as $detail) {
+            // Manejo de Lotes (Batches)
+            if (isset($detail['batch_number']) && isset($detail['expiration_date'])) {
+                // Buscar si el lote ya existe para ese producto, o crearlo
+                $batch = Batch::firstOrCreate(
+                    [
+                        'product_id' => $detail['product_id'],
+                        'batch_number' => $detail['batch_number']
+                    ],
+                    [
+                        'stock' => 0,
+                        'initial_stock' => 0,
+                        'expiration_date' => $detail['expiration_date'],
+                        'active' => 1,
+                        'user_created' => auth()->id() ?? 1,
+                        'user_updated' => auth()->id() ?? 1,
+                    ]
+                );
+                
+                // Incrementar el stock del lote
+                $batch->stock += $detail['quantity'];
+                $batch->initial_stock += $detail['quantity'];
+                $batch->save();
+
+                $detail['batch_id'] = $batch->id;
+            }
+
             $purchase->purchaseDetails()->create($detail);
         }
 

@@ -16,6 +16,9 @@ class Batch extends Model
         'stock',
         'initial_stock',
         'expiration_date',
+        'active',
+        'user_created',
+        'user_updated'
     ];
 
     /**

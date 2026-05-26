@@ -4,6 +4,8 @@ namespace App\Repositories\Sale;
 
 use App\Models\Sale;
 use App\Models\SaleDetail;
+use App\Models\Batch;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Collection;
 
@@ -44,7 +46,42 @@ class SaleRepository extends BaseRepository
         $sale = parent::create($data);
 
         foreach ($details as $detail) {
-            $sale->saleDetails()->create($detail);
+            $saleDetail = $sale->saleDetails()->create($detail);
+            
+            // Lógica FIFO: Descontar stock de lotes próximos a vencer
+            $remainingQuantity = $detail['quantity'];
+            
+            $batches = Batch::where('product_id', $detail['product_id'])
+                ->where('stock', '>', 0)
+                ->where('active', 1)
+                ->orderBy('expiration_date', 'asc')
+                ->lockForUpdate() // Prevenir race conditions
+                ->get();
+                
+            foreach ($batches as $batch) {
+                if ($remainingQuantity <= 0) break;
+                
+                $take = min($batch->stock, $remainingQuantity);
+                $batch->stock -= $take;
+                $batch->save();
+                
+                // Registrar trazabilidad en la tabla pivote
+                DB::table('batch_sale_detail')->insert([
+                    'sale_detail_id' => $saleDetail->id,
+                    'batch_id' => $batch->id,
+                    'quantity' => $take,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
+                $remainingQuantity -= $take;
+            }
+            
+            // Si remainingQuantity > 0 significa que se vendió sin stock de lote suficiente
+            // (podría lanzarse una excepción o permitirse saldo negativo según regla de negocio)
+            if ($remainingQuantity > 0) {
+                throw new \Exception("Stock insuficiente en lotes para el producto ID: {$detail['product_id']}");
+            }
         }
 
         return $sale->load(['saleDetails.product']);
