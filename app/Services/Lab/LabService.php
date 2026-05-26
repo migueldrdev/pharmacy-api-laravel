@@ -47,11 +47,11 @@ class LabService
         }
     }
 
-    public function delete(Lab $lab, $userId): void
+    public function delete(Lab $lab): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($lab, $userId);
+            $this->repo->delete($lab);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

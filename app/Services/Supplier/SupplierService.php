@@ -47,11 +47,11 @@ class SupplierService
         }
     }
 
-    public function delete(Supplier $supplier, $userId): void
+    public function delete(Supplier $supplier): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($supplier, $userId);
+            $this->repo->delete($supplier);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

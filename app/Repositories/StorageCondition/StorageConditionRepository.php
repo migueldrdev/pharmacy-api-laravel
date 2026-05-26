@@ -3,43 +3,17 @@
 namespace App\Repositories\StorageCondition;
 
 use App\Models\StorageCondition;
-use Carbon\Carbon;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class StorageConditionRepository
+class StorageConditionRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(StorageCondition $model)
     {
-        return StorageCondition::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return StorageCondition::findOrFail($id);
-    }
-
-    public function create(array $data): StorageCondition
-    {
-        return StorageCondition::create($data);
-    }
-
-    public function update(StorageCondition $storageCondition, array $data): StorageCondition
-    {
-        $storageCondition->update($data);
-        return $storageCondition;
-    }
-
-    public function delete(StorageCondition $storageCondition, $userId): bool
-    {
-        // Asumiendo un "soft delete" actualizando 'active' a 0 y registrando user_updated
-        return $storageCondition->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return StorageCondition::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

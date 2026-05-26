@@ -45,7 +45,6 @@ class LabController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $lab = $this->service->create($data);
             return ResponseHelper::success(
                 data: new LabResource($lab),
@@ -76,7 +75,6 @@ class LabController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($lab, $data);
             return ResponseHelper::success(
                 data: new LabResource($updated),
@@ -96,7 +94,7 @@ class LabController extends Controller
     public function destroy(Lab $lab)
     {
         try {
-            $this->service->delete($lab, Auth::id());
+            $this->service->delete($lab);
             return ResponseHelper::success(
                 message: 'Laboratorio eliminado correctamente',
                 title: 'Laboratorio eliminado'

@@ -45,7 +45,6 @@ class DocumentTypeController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $documentType = $this->service->create($data);
             return ResponseHelper::success(
                 data: new DocumentTypeResource($documentType),
@@ -76,7 +75,6 @@ class DocumentTypeController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($documentType, $data);
             return ResponseHelper::success(
                 data: new DocumentTypeResource($updated),
@@ -96,7 +94,7 @@ class DocumentTypeController extends Controller
     public function destroy(DocumentType $documentType)
     {
         try {
-            $this->service->delete($documentType, Auth::id());
+            $this->service->delete($documentType);
             return ResponseHelper::success(
                 message: 'Tipo de documento eliminado correctamente',
                 title: 'Tipo de documento eliminado'

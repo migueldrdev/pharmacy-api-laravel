@@ -47,11 +47,11 @@ class DocumentTypeService
         }
     }
 
-    public function delete(DocumentType $documentType, $userId): void
+    public function delete(DocumentType $documenttype): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($documentType, $userId);
+            $this->repo->delete($documentType);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

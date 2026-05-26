@@ -3,42 +3,31 @@
 namespace App\Repositories\Client;
 
 use App\Models\Client;
-use Carbon\Carbon;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class ClientRepository
+class ClientRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(Client $model)
     {
-        return Client::with('documentType')->get();
+        parent::__construct($model);
+    }
+    public function all(array $columns = ['*']): Collection
+    {
+        return $this->model->with('documentType')->where('active', 1)->get($columns);
     }
 
-    public function find($id)
+    public function find($id, array $columns = ['*']): ?Client
     {
-        return Client::with('documentType')->findOrFail($id);
+        return $this->model->with('documentType')->where('active', 1)->find($id, $columns);
     }
 
-    public function create(array $data): Client
+    public function findOrFail($id, array $columns = ['*']): Client
     {
-        return Client::create($data);
+        return $this->model->with('documentType')->where('active', 1)->findOrFail($id, $columns);
     }
-
-    public function update(Client $client, array $data): Client
+    public function getActiveForCombo(): Collection
     {
-        $client->update($data);
-        return $client;
-    }
-
-    public function delete(Client $client, $userId): bool
-    {
-        return $client->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return Client::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

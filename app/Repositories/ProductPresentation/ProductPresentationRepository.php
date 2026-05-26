@@ -3,42 +3,17 @@
 namespace App\Repositories\ProductPresentation;
 
 use App\Models\ProductPresentation;
-use Carbon\Carbon; // Importar Carbon
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class ProductPresentationRepository
+class ProductPresentationRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(ProductPresentation $model)
     {
-        return ProductPresentation::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return ProductPresentation::findOrFail($id);
-    }
-
-    public function create(array $data): ProductPresentation
-    {
-        return ProductPresentation::create($data);
-    }
-
-    public function update(ProductPresentation $productPresentation, array $data): ProductPresentation
-    {
-        $productPresentation->update($data);
-        return $productPresentation;
-    }
-
-    public function delete(ProductPresentation $productPresentation): bool
-    {
-        // Para ProductPresentation, solo actualizamos 'active' ya que no tiene user_updated
-        return $productPresentation->update([
-            'active' => 0,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return ProductPresentation::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

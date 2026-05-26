@@ -3,43 +3,17 @@
 namespace App\Repositories\Category;
 
 use App\Models\Category;
-use Carbon\Carbon; // Importar Carbon
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class CategoryRepository
+class CategoryRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(Category $model)
     {
-        return Category::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return Category::findOrFail($id);
-    }
-
-    public function create(array $data): Category
-    {
-        return Category::create($data);
-    }
-
-    public function update(Category $category, array $data): Category
-    {
-        $category->update($data);
-        return $category;
-    }
-
-    public function delete(Category $category, $userId): bool
-    {
-        // Asumiendo un "soft delete" actualizando 'active' a 0 y registrando user_updated
-        return $category->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return Category::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

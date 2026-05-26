@@ -29,12 +29,12 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $this->model->where('active', 1)->paginate($perPage, $columns);
     }
 
-    public function find(int $id, array $columns = ['*']): ?Model
+    public function find($id, array $columns = ['*']): ?Model
     {
         return $this->model->where('active', 1)->find($id, $columns);
     }
 
-    public function findOrFail(int $id, array $columns = ['*']): Model
+    public function findOrFail($id, array $columns = ['*']): Model
     {
         return $this->model->where('active', 1)->findOrFail($id, $columns);
     }
@@ -48,20 +48,22 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $this->model->create($data);
     }
 
-    public function update(int $id, array $data): bool
+    public function update($idOrModel, array $data): Model
     {
-        $model = $this->findOrFail($id);
+        $model = $idOrModel instanceof Model ? $idOrModel : $this->findOrFail($idOrModel);
         $data['user_updated'] = Auth::id() ?? 1;
         
-        return $model->update($data);
+        $model->update($data);
+        
+        return $model;
     }
 
     /**
      * Logical delete (active = 0)
      */
-    public function delete(int $id): bool
+    public function delete($idOrModel): bool
     {
-        $model = $this->findOrFail($id);
+        $model = $idOrModel instanceof Model ? $idOrModel : $this->findOrFail($idOrModel);
         
         return $model->update([
             'active' => 0,

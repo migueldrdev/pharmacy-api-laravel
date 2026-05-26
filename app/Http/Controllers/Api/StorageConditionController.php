@@ -45,7 +45,6 @@ class StorageConditionController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $storageCondition = $this->service->create($data);
             return ResponseHelper::success(
                 data: new StorageConditionResource($storageCondition),
@@ -76,7 +75,6 @@ class StorageConditionController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($storageCondition, $data);
             return ResponseHelper::success(
                 data: new StorageConditionResource($updated),
@@ -96,7 +94,7 @@ class StorageConditionController extends Controller
     public function destroy(StorageCondition $storageCondition)
     {
         try {
-            $this->service->delete($storageCondition, Auth::id());
+            $this->service->delete($storageCondition);
             return ResponseHelper::success(
                 message: 'Condición de almacenamiento eliminada correctamente',
                 title: 'Condición de almacenamiento eliminada'

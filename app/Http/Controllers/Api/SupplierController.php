@@ -45,7 +45,6 @@ class SupplierController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $supplier = $this->service->create($data);
             return ResponseHelper::success(
                 data: new SupplierResource($supplier),
@@ -76,7 +75,6 @@ class SupplierController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($supplier, $data);
             return ResponseHelper::success(
                 data: new SupplierResource($updated),
@@ -96,7 +94,7 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         try {
-            $this->service->delete($supplier, Auth::id());
+            $this->service->delete($supplier);
             return ResponseHelper::success(
                 message: 'Proveedor eliminado correctamente',
                 title: 'Proveedor eliminado'

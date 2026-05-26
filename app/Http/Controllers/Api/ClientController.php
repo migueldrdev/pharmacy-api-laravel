@@ -45,7 +45,6 @@ class ClientController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $client = $this->service->create($data);
             return ResponseHelper::success(
                 data: new ClientResource($client),
@@ -76,7 +75,6 @@ class ClientController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($client, $data);
             return ResponseHelper::success(
                 data: new ClientResource($updated),
@@ -96,7 +94,7 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         try {
-            $this->service->delete($client, Auth::id());
+            $this->service->delete($client);
             return ResponseHelper::success(
                 message: 'Cliente eliminado correctamente',
                 title: 'Cliente eliminado'

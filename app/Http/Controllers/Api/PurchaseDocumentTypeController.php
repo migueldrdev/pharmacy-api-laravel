@@ -45,7 +45,6 @@ class PurchaseDocumentTypeController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $purchaseDocumentType = $this->service->create($data);
             return ResponseHelper::success(
                 data: new PurchaseDocumentTypeResource($purchaseDocumentType),
@@ -76,7 +75,6 @@ class PurchaseDocumentTypeController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($purchaseDocumentType, $data);
             return ResponseHelper::success(
                 data: new PurchaseDocumentTypeResource($updated),
@@ -96,7 +94,7 @@ class PurchaseDocumentTypeController extends Controller
     public function destroy(PurchaseDocumentType $purchaseDocumentType)
     {
         try {
-            $this->service->delete($purchaseDocumentType, Auth::id());
+            $this->service->delete($purchaseDocumentType);
             return ResponseHelper::success(
                 message: 'Tipo de documento de compra eliminado correctamente',
                 title: 'Tipo de documento de compra eliminado'

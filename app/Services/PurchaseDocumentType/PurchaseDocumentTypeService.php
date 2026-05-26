@@ -47,11 +47,11 @@ class PurchaseDocumentTypeService
         }
     }
 
-    public function delete(PurchaseDocumentType $purchaseDocumentType, $userId): void
+    public function delete(PurchaseDocumentType $purchasedocumenttype): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($purchaseDocumentType, $userId);
+            $this->repo->delete($purchaseDocumentType);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

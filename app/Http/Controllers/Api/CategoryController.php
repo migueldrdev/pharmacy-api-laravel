@@ -45,7 +45,6 @@ class CategoryController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $category = $this->service->create($data);
             return ResponseHelper::success(
                 data: new CategoryResource($category),
@@ -76,7 +75,6 @@ class CategoryController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($category, $data);
             return ResponseHelper::success(
                 data: new CategoryResource($updated),
@@ -96,7 +94,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         try {
-            $this->service->delete($category, Auth::id());
+            $this->service->delete($category);
             return ResponseHelper::success(
                 message: 'Categoría eliminada correctamente',
                 title: 'Categoría eliminada'

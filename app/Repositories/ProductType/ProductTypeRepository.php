@@ -3,42 +3,17 @@
 namespace App\Repositories\ProductType;
 
 use App\Models\ProductType;
-use Carbon\Carbon;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class ProductTypeRepository
+class ProductTypeRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(ProductType $model)
     {
-        return ProductType::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return ProductType::findOrFail($id);
-    }
-
-    public function create(array $data): ProductType
-    {
-        return ProductType::create($data);
-    }
-
-    public function update(ProductType $productType, array $data): ProductType
-    {
-        $productType->update($data);
-        return $productType;
-    }
-
-    public function delete(ProductType $productType): bool
-    {
-        // Para ProductType, solo actualizamos 'active' ya que no tiene user_updated
-        return $productType->update([
-            'active' => 0,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return ProductType::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }
