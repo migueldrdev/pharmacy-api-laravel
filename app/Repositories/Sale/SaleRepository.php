@@ -4,47 +4,66 @@ namespace App\Repositories\Sale;
 
 use App\Models\Sale;
 use App\Models\SaleDetail;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class SaleRepository
+class SaleRepository extends BaseRepository
 {
-    public function all(): Sale
+    public function __construct(Sale $model)
     {
-        return Sale::with(['client', 'documentType', 'user', 'saleDetails.product'])->get();
+        parent::__construct($model);
     }
 
-    public function find($id)
+    public function all(array $columns = ['*']): Collection
     {
-        return Sale::with(['client', 'documentType', 'user', 'saleDetails.product'])->findOrFail($id);
+        return $this->model->with(['client', 'documentType', 'user', 'saleDetails.product'])
+                           ->where('active', 1)
+                           ->get($columns);
+    }
+
+    public function find($id, array $columns = ['*']): ?Sale
+    {
+        return $this->model->with(['client', 'documentType', 'user', 'saleDetails.product'])
+                           ->where('active', 1)
+                           ->find($id, $columns);
+    }
+    
+    public function findOrFail($id, array $columns = ['*']): Sale
+    {
+        return $this->model->with(['client', 'documentType', 'user', 'saleDetails.product'])
+                           ->where('active', 1)
+                           ->findOrFail($id, $columns);
     }
 
     public function create(array $data): Sale
     {
-        $details = $data['details'];
-        unset($data['details']); // Eliminar detalles antes de crear la venta principal
+        $details = $data['details'] ?? [];
+        unset($data['details']);
 
-        $sale = Sale::create($data);
+        // Let BaseRepository handle active, user_created, user_updated
+        $sale = parent::create($data);
 
         foreach ($details as $detail) {
             $sale->saleDetails()->create($detail);
         }
 
-        return $sale;
+        return $sale->load(['saleDetails.product']);
     }
 
-    public function update(Sale $sale, array $data): Sale
+    public function update($idOrModel, array $data): Sale
     {
-        $details = $data['details'];
+        $sale = $idOrModel instanceof Sale ? $idOrModel : $this->findOrFail($idOrModel);
+        
+        $details = $data['details'] ?? [];
         unset($data['details']);
 
-        $sale->update($data);
+        // Base update
+        parent::update($sale, $data);
 
-        // Sincronizar detalles: eliminar los que no están, actualizar los existentes, crear nuevos
+        // Synchronize details
         $existingDetailIds = $sale->saleDetails->pluck('id')->toArray();
         $incomingDetailIds = collect($details)->pluck('id')->filter()->toArray();
 
-        // Eliminar detalles que ya no están en la solicitud
         $detailsToDelete = array_diff($existingDetailIds, $incomingDetailIds);
         if (!empty($detailsToDelete)) {
             SaleDetail::whereIn('id', $detailsToDelete)->delete();
@@ -52,23 +71,12 @@ class SaleRepository
 
         foreach ($details as $detail) {
             if (isset($detail['id'])) {
-                // Actualizar detalle existente
                 $sale->saleDetails()->where('id', $detail['id'])->update($detail);
             } else {
-                // Crear nuevo detalle
                 $sale->saleDetails()->create($detail);
             }
         }
 
-        return $sale->load(['saleDetails.product']); // Recargar para obtener los detalles actualizados
-    }
-
-    public function delete(Sale $sale, $userId): bool
-    {
-        return $sale->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
+        return $sale->load(['saleDetails.product']);
     }
 }

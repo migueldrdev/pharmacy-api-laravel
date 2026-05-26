@@ -6,6 +6,7 @@ use App\Repositories\Product\ProductRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 
 class ProductService
 {
@@ -27,7 +28,8 @@ class ProductService
 
         try {
             if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-                $data['image'] = saveImage($data['image']);
+                // Modificado para usar storage s3 o local estandarizado
+                $data['image'] = Storage::disk(config('filesystems.default'))->putFile('products', $data['image']);
             }
 
             $product = $this->repo->create($data);
@@ -44,19 +46,12 @@ class ProductService
         DB::beginTransaction();
 
         try {
-            // Verifica si 'image' está presente en los datos validados
-            // Y si es una instancia de UploadedFile
             if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-                // Si hay una imagen antigua, la borra
                 if ($product->image) {
-                    deleteImage($product->image);
+                    Storage::disk(config('filesystems.default'))->delete($product->image);
                 }
-                // Guarda la nueva imagen
-                $data['image'] = saveImage($data['image']);
+                $data['image'] = Storage::disk(config('filesystems.default'))->putFile('products', $data['image']);
             } else {
-                // Si 'image' no está presente O no es un UploadedFile (es decir, el frontend no envió una nueva imagen)
-                // Asegúrate de que el campo 'image' no se actualice accidentalmente en el modelo.
-                // Esto es crucial para preservar la imagen existente.
                 unset($data['image']);
             }
 
@@ -69,13 +64,16 @@ class ProductService
         }
     }
 
-    public function delete(Product $product, $userId): void
+    public function delete(Product $product): void
     {
         DB::beginTransaction();
 
         try {
-            if ($product->image) deleteImage($product->image);
-            $this->repo->delete($product, $userId);
+            // Decisión de negocio: Al hacer soft-delete, ¿eliminamos la imagen?
+            // Generalmente en soft-delete mantenemos la imagen por auditoría.
+            // Si quieres borrarla: if ($product->image) Storage::disk(config('filesystems.default'))->delete($product->image);
+            
+            $this->repo->delete($product);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();

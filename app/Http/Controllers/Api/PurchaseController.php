@@ -44,7 +44,6 @@ class PurchaseController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $purchase = $this->service->create($data);
             return ResponseHelper::success(
                 data: new PurchaseResource($purchase),
@@ -75,7 +74,6 @@ class PurchaseController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($purchase, $data);
             return ResponseHelper::success(
                 data: new PurchaseResource($updated),
@@ -95,7 +93,7 @@ class PurchaseController extends Controller
     public function destroy(Purchase $purchase)
     {
         try {
-            $this->service->delete($purchase, Auth::id());
+            $this->service->delete($purchase);
             return ResponseHelper::success(
                 message: 'Compra eliminada correctamente',
                 title: 'Compra eliminada'

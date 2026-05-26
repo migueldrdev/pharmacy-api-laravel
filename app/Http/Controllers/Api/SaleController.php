@@ -44,7 +44,6 @@ class SaleController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $sale = $this->service->create($data);
             return ResponseHelper::success(
                 data: new SaleResource($sale),
@@ -75,7 +74,6 @@ class SaleController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($sale, $data);
             return ResponseHelper::success(
                 data: new SaleResource($updated),
@@ -95,7 +93,7 @@ class SaleController extends Controller
     public function destroy(Sale $sale)
     {
         try {
-            $this->service->delete($sale, Auth::id());
+            $this->service->delete($sale);
             return ResponseHelper::success(
                 message: 'Venta eliminada correctamente',
                 title: 'Venta eliminada'

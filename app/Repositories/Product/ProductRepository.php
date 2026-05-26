@@ -3,45 +3,39 @@
 namespace App\Repositories\Product;
 
 use App\Models\Product;
-use Carbon\Carbon;
-use Illuminate\Http\UploadedFile;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class ProductRepository
+class ProductRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(Product $model)
     {
-        // Cargar relaciones para el listado
-        return Product::with(['category', 'lab', 'type', 'presentation', 'storageCondition'])->get();
+        parent::__construct($model);
     }
 
-    public function find($id)
+    public function all(array $columns = ['*']): Collection
     {
-        // Cargar relaciones para el detalle
-        return Product::with(['category', 'lab', 'type', 'presentation', 'storageCondition'])->findOrFail($id);
+        return $this->model->with(['category', 'lab', 'type', 'presentation', 'storageCondition'])
+                           ->where('active', 1)
+                           ->get($columns);
     }
 
-    public function create(array $data): Product
+    public function find($id, array $columns = ['*']): ?Product
     {
-        return Product::create($data);
+        return $this->model->with(['category', 'lab', 'type', 'presentation', 'storageCondition'])
+                           ->where('active', 1)
+                           ->find($id, $columns);
+    }
+    
+    public function findOrFail($id, array $columns = ['*']): Product
+    {
+        return $this->model->with(['category', 'lab', 'type', 'presentation', 'storageCondition'])
+                           ->where('active', 1)
+                           ->findOrFail($id, $columns);
     }
 
-    public function update(Product $product, array $data): Product
+    public function getActiveForCombo(): Collection
     {
-        $product->update($data);
-        return $product;
-    }
-
-    public function delete(Product $product, $userId): bool
-    {
-        return $product->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return Product::where('active', 1)->get();
+        return $this->model->where('active', 1)->select('id', 'name')->get();
     }
 }
