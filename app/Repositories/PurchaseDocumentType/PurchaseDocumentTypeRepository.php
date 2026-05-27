@@ -3,42 +3,17 @@
 namespace App\Repositories\PurchaseDocumentType;
 
 use App\Models\PurchaseDocumentType;
-use Carbon\Carbon;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class PurchaseDocumentTypeRepository
+class PurchaseDocumentTypeRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(PurchaseDocumentType $model)
     {
-        return PurchaseDocumentType::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return PurchaseDocumentType::findOrFail($id);
-    }
-
-    public function create(array $data): PurchaseDocumentType
-    {
-        return PurchaseDocumentType::create($data);
-    }
-
-    public function update(PurchaseDocumentType $purchaseDocumentType, array $data): PurchaseDocumentType
-    {
-        $purchaseDocumentType->update($data);
-        return $purchaseDocumentType;
-    }
-
-    public function delete(PurchaseDocumentType $purchaseDocumentType, $userId): bool
-    {
-        return $purchaseDocumentType->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return PurchaseDocumentType::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

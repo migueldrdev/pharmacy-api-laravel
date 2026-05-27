@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supplier\StoreSupplierRequest;
 use App\Http\Requests\Supplier\UpdateSupplierRequest;
@@ -25,14 +26,18 @@ class SupplierController extends Controller
     {
         try {
             $suppliers = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de proveedores',
+            return ResponseHelper::success(
+                data: SupplierResource::collection($suppliers),
                 message: 'Consulta exitosa',
-                data: SupplierResource::collection($suppliers)
+                title: 'Listado de proveedores'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -40,49 +45,48 @@ class SupplierController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $supplier = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new SupplierResource($supplier),
+                message: 'Proveedor creado exitosamente',
                 title: 'Proveedor creado',
-                message: 'Éxito',
-                data: new SupplierResource($supplier)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el proveedor',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(Supplier $supplier)
     {
-        return responseApi(true, 'Proveedor', 'Consulta exitosa', new SupplierResource($supplier));
+        return ResponseHelper::success(
+            data: new SupplierResource($supplier),
+            message: 'Consulta exitosa',
+            title: 'Proveedor'
+        );
     }
 
     public function update(UpdateSupplierRequest $request, Supplier $supplier)
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($supplier, $data);
-            return responseApi(
-                code: 200,
-                title: 'Proveedor actualizado',
+            return ResponseHelper::success(
+                data: new SupplierResource($updated),
                 message: 'Proveedor actualizado correctamente',
-                data: new SupplierResource($updated)
+                title: 'Proveedor actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el proveedor',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,15 +94,17 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         try {
-            $this->service->delete($supplier, Auth::id());
-            return responseApi(true, 'Proveedor eliminado', 'Éxito');
+            $this->service->delete($supplier);
+            return ResponseHelper::success(
+                message: 'Proveedor eliminado correctamente',
+                title: 'Proveedor eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el proveedor',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +116,18 @@ class SupplierController extends Controller
     {
         try {
             $suppliers = $this->service->getActiveSuppliersForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de proveedores para combo',
+            return ResponseHelper::success(
+                data: SupplierComboResource::collection($suppliers),
                 message: 'Consulta exitosa',
-                data: SupplierComboResource::collection($suppliers)
+                title: 'Listado de proveedores para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

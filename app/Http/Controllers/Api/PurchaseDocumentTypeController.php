@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PurchaseDocumentType\StorePurchaseDocumentTypeRequest;
 use App\Http\Requests\PurchaseDocumentType\UpdatePurchaseDocumentTypeRequest;
@@ -25,14 +26,18 @@ class PurchaseDocumentTypeController extends Controller
     {
         try {
             $purchaseDocumentTypes = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de documento de compra',
+            return ResponseHelper::success(
+                data: PurchaseDocumentTypeResource::collection($purchaseDocumentTypes),
                 message: 'Consulta exitosa',
-                data: PurchaseDocumentTypeResource::collection($purchaseDocumentTypes)
+                title: 'Listado de tipos de documento de compra'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -40,49 +45,48 @@ class PurchaseDocumentTypeController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $purchaseDocumentType = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new PurchaseDocumentTypeResource($purchaseDocumentType),
+                message: 'Tipo de documento de compra creado exitosamente',
                 title: 'Tipo de documento de compra creado',
-                message: 'Éxito',
-                data: new PurchaseDocumentTypeResource($purchaseDocumentType)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el tipo de documento de compra',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(PurchaseDocumentType $purchaseDocumentType)
     {
-        return responseApi(true, 'Tipo de documento de compra', 'Consulta exitosa', new PurchaseDocumentTypeResource($purchaseDocumentType));
+        return ResponseHelper::success(
+            data: new PurchaseDocumentTypeResource($purchaseDocumentType),
+            message: 'Consulta exitosa',
+            title: 'Tipo de documento de compra'
+        );
     }
 
     public function update(UpdatePurchaseDocumentTypeRequest $request, PurchaseDocumentType $purchaseDocumentType)
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($purchaseDocumentType, $data);
-            return responseApi(
-                code: 200,
-                title: 'Tipo de documento de compra actualizado',
+            return ResponseHelper::success(
+                data: new PurchaseDocumentTypeResource($updated),
                 message: 'Tipo de documento de compra actualizado correctamente',
-                data: new PurchaseDocumentTypeResource($updated)
+                title: 'Tipo de documento de compra actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el tipo de documento de compra',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,15 +94,17 @@ class PurchaseDocumentTypeController extends Controller
     public function destroy(PurchaseDocumentType $purchaseDocumentType)
     {
         try {
-            $this->service->delete($purchaseDocumentType, Auth::id());
-            return responseApi(true, 'Tipo de documento de compra eliminado', 'Éxito');
+            $this->service->delete($purchaseDocumentType);
+            return ResponseHelper::success(
+                message: 'Tipo de documento de compra eliminado correctamente',
+                title: 'Tipo de documento de compra eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el tipo de documento de compra',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +116,18 @@ class PurchaseDocumentTypeController extends Controller
     {
         try {
             $purchaseDocumentTypes = $this->service->getActivePurchaseDocumentTypesForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de documento de compra para combo',
+            return ResponseHelper::success(
+                data: PurchaseDocumentTypeComboResource::collection($purchaseDocumentTypes),
                 message: 'Consulta exitosa',
-                data: PurchaseDocumentTypeComboResource::collection($purchaseDocumentTypes)
+                title: 'Listado de tipos de documento de compra para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

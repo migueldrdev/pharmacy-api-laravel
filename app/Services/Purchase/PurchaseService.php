@@ -47,11 +47,11 @@ class PurchaseService
         }
     }
 
-    public function delete(Purchase $purchase, $userId): void
+    public function delete(Purchase $purchase): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($purchase, $userId);
+            $this->repo->delete($purchase);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

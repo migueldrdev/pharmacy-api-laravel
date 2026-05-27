@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\ResponseHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -15,13 +16,11 @@ class BaseFormRequest extends FormRequest
         $message = collect($validator->errors()->all())->first() ?: 'Datos inválidos';
 
         throw new HttpResponseException(
-            responseApi(
-                false,
-                $message,
-                $title,
-                null,
-                ['errors' => $validator->errors()],
-                422
+            ResponseHelper::error(
+                message: $message,
+                code: 422,
+                extra: ['errors' => $validator->errors()],
+                title: $title
             )
         );
     }

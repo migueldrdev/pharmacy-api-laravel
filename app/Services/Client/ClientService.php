@@ -47,11 +47,11 @@ class ClientService
         }
     }
 
-    public function delete(Client $client, $userId): void
+    public function delete(Client $client): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($client, $userId);
+            $this->repo->delete($client);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

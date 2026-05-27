@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorageCondition\StoreStorageConditionRequest; // Nuevo Request
 use App\Http\Requests\StorageCondition\UpdateStorageConditionRequest; // Nuevo Request
@@ -25,14 +26,18 @@ class StorageConditionController extends Controller
     {
         try {
             $conditions = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de condiciones de almacenamiento',
+            return ResponseHelper::success(
+                data: StorageConditionResource::collection($conditions),
                 message: 'Consulta exitosa',
-                data: StorageConditionResource::collection($conditions)
+                title: 'Listado de condiciones de almacenamiento'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -40,49 +45,48 @@ class StorageConditionController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id();
             $storageCondition = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new StorageConditionResource($storageCondition),
+                message: 'Condición de almacenamiento creada exitosamente',
                 title: 'Condición de almacenamiento creada',
-                message: 'Éxito',
-                data: new StorageConditionResource($storageCondition)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear la condición de almacenamiento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(StorageCondition $storageCondition)
     {
-        return responseApi(true, 'Condición de almacenamiento', 'Consulta exitosa', new StorageConditionResource($storageCondition));
+        return ResponseHelper::success(
+            data: new StorageConditionResource($storageCondition),
+            message: 'Consulta exitosa',
+            title: 'Condición de almacenamiento'
+        );
     }
 
     public function update(UpdateStorageConditionRequest $request, StorageCondition $storageCondition)
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
             $updated = $this->service->update($storageCondition, $data);
-            return responseApi(
-                code: 200,
-                title: 'Condición de almacenamiento actualizada',
+            return ResponseHelper::success(
+                data: new StorageConditionResource($updated),
                 message: 'Condición de almacenamiento actualizada correctamente',
-                data: new StorageConditionResource($updated)
+                title: 'Condición de almacenamiento actualizada'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar la condición de almacenamiento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,15 +94,17 @@ class StorageConditionController extends Controller
     public function destroy(StorageCondition $storageCondition)
     {
         try {
-            $this->service->delete($storageCondition, Auth::id());
-            return responseApi(true, 'Condición de almacenamiento eliminada', 'Éxito');
+            $this->service->delete($storageCondition);
+            return ResponseHelper::success(
+                message: 'Condición de almacenamiento eliminada correctamente',
+                title: 'Condición de almacenamiento eliminada'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar la condición de almacenamiento',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -110,14 +116,18 @@ class StorageConditionController extends Controller
     {
         try {
             $conditions = $this->service->getActiveStorageConditionsForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de condiciones de almacenamiento para combo',
+            return ResponseHelper::success(
+                data: StorageConditionComboResource::collection($conditions),
                 message: 'Consulta exitosa',
-                data: StorageConditionComboResource::collection($conditions)
+                title: 'Listado de condiciones de almacenamiento para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

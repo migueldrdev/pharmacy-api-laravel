@@ -47,11 +47,11 @@ class SaleService
         }
     }
 
-    public function delete(Sale $sale, $userId): void
+    public function delete(Sale $sale): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($sale, $userId);
+            $this->repo->delete($sale);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

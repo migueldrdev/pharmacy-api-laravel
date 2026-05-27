@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Services\Product\ProductService;
 use App\Models\Product;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\Product\ProductResource; // Importa tu Resource
+use App\Http\Resources\Product\ProductResource;
 use Throwable;
-use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -25,14 +24,18 @@ class ProductController extends Controller
     {
         try {
             $products = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de productos',
+            return ResponseHelper::success(
+                data: ProductResource::collection($products),
                 message: 'Consulta exitosa',
-                data: ProductResource::collection($products)
+                title: 'Listado de productos'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -40,50 +43,50 @@ class ProductController extends Controller
     {
         try {
             $data = $request->validated();
-            $data['user_created'] = Auth::id(); // Agrega el usuario autenticado
             $product = $this->service->create($data);
-            return responseApi(
-                code: 200,
-                title: 'Producto creada',
-                message: 'Éxito',
-                data: $product
+            
+            return ResponseHelper::success(
+                data: new ProductResource($product),
+                message: 'Producto creado exitosamente',
+                title: 'Producto creado',
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(Product $product)
     {
-        return responseApi(true, 'Producto', 'Consulta exitosa', $product);
+        return ResponseHelper::success(
+            data: new ProductResource($product),
+            message: 'Consulta exitosa',
+            title: 'Producto'
+        );
     }
 
     public function update(UpdateProductRequest $request, Product $product)
     {
         try {
             $data = $request->validated();
-            $data['user_updated'] = Auth::id();
-            Log::info($data);
             $updated = $this->service->update($product, $data);
-            return responseApi(
-                code: 200,
-                title: 'Categoría actualizada',
-                message: 'Categoría actualizada correctamente',
-                data: $updated
+            
+            return ResponseHelper::success(
+                data: new ProductResource($updated),
+                message: 'Producto actualizado correctamente',
+                title: 'Producto actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -91,15 +94,18 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
-            $this->service->delete($product, Auth::id());
-            return responseApi(true, 'Producto eliminado', 'Éxito');
+            $this->service->delete($product);
+            
+            return ResponseHelper::success(
+                message: 'Producto eliminado correctamente',
+                title: 'Producto eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductType\StoreProductTypeRequest;
 use App\Http\Requests\ProductType\UpdateProductTypeRequest;
@@ -24,14 +25,18 @@ class ProductTypeController extends Controller
     {
         try {
             $productTypes = $this->service->list();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de producto',
+            return ResponseHelper::success(
+                data: ProductTypeResource::collection($productTypes),
                 message: 'Consulta exitosa',
-                data: ProductTypeResource::collection($productTypes)
+                title: 'Listado de tipos de producto'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 
@@ -41,26 +46,29 @@ class ProductTypeController extends Controller
             $data = $request->validated();
             // No user_created para ProductType según tu esquema
             $productType = $this->service->create($data);
-            return responseApi(
-                code: 200,
+            return ResponseHelper::success(
+                data: new ProductTypeResource($productType),
+                message: 'Tipo de producto creado exitosamente',
                 title: 'Tipo de producto creado',
-                message: 'Éxito',
-                data: new ProductTypeResource($productType)
+                code: 201
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo crear',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo crear el tipo de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
 
     public function show(ProductType $productType)
     {
-        return responseApi(true, 'Tipo de producto', 'Consulta exitosa', new ProductTypeResource($productType));
+        return ResponseHelper::success(
+            data: new ProductTypeResource($productType),
+            message: 'Consulta exitosa',
+            title: 'Tipo de producto'
+        );
     }
 
     public function update(UpdateProductTypeRequest $request, ProductType $productType)
@@ -69,19 +77,17 @@ class ProductTypeController extends Controller
             $data = $request->validated();
             // No user_updated para ProductType según tu esquema
             $updated = $this->service->update($productType, $data);
-            return responseApi(
-                code: 200,
-                title: 'Tipo de producto actualizado',
+            return ResponseHelper::success(
+                data: new ProductTypeResource($updated),
                 message: 'Tipo de producto actualizado correctamente',
-                data: new ProductTypeResource($updated)
+                title: 'Tipo de producto actualizado'
             );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo actualizar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo actualizar el tipo de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -90,14 +96,16 @@ class ProductTypeController extends Controller
     {
         try {
             $this->service->delete($productType); // No se pasa userId aquí
-            return responseApi(true, 'Tipo de producto eliminado', 'Éxito');
+            return ResponseHelper::success(
+                message: 'Tipo de producto eliminado correctamente',
+                title: 'Tipo de producto eliminado'
+            );
         } catch (Throwable $e) {
-            return responseApi(
-                success: false,
-                title: 'Error',
-                message: 'No se pudo eliminar',
-                data: ['error' => $e->getMessage()],
-                code: 500
+            return ResponseHelper::error(
+                message: 'No se pudo eliminar el tipo de producto',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
             );
         }
     }
@@ -109,14 +117,18 @@ class ProductTypeController extends Controller
     {
         try {
             $productTypes = $this->service->getActiveProductTypesForCombo();
-            return responseApi(
-                code: 200,
-                title: 'Listado de tipos de producto para combo',
+            return ResponseHelper::success(
+                data: ProductTypeComboResource::collection($productTypes),
                 message: 'Consulta exitosa',
-                data: ProductTypeComboResource::collection($productTypes)
+                title: 'Listado de tipos de producto para combo'
             );
         } catch (Throwable $e) {
-            return responseApi(false, 'Error', 'No se pudo listar para combo', null, ['error' => $e->getMessage()], 500);
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
         }
     }
 }

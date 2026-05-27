@@ -47,11 +47,11 @@ class CategoryService
         }
     }
 
-    public function delete(Category $category, $userId): void
+    public function delete(Category $category): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($category, $userId);
+            $this->repo->delete($category);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();

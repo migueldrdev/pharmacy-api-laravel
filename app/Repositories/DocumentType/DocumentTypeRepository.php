@@ -3,42 +3,17 @@
 namespace App\Repositories\DocumentType;
 
 use App\Models\DocumentType;
-use Carbon\Carbon;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Collection;
 
-class DocumentTypeRepository
+class DocumentTypeRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(DocumentType $model)
     {
-        return DocumentType::all();
+        parent::__construct($model);
     }
-
-    public function find($id)
+    public function getActiveForCombo(): Collection
     {
-        return DocumentType::findOrFail($id);
-    }
-
-    public function create(array $data): DocumentType
-    {
-        return DocumentType::create($data);
-    }
-
-    public function update(DocumentType $documentType, array $data): DocumentType
-    {
-        $documentType->update($data);
-        return $documentType;
-    }
-
-    public function delete(DocumentType $documentType, $userId): bool
-    {
-        return $documentType->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
-    }
-
-    public function getActiveForCombo()
-    {
-        return DocumentType::where('active', 1)->get();
+        return $this->model->where('active', 1)->get();
     }
 }

@@ -4,41 +4,87 @@ namespace App\Repositories\Purchase;
 
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
+use App\Models\Batch;
+use App\Repositories\BaseRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
-class PurchaseRepository
+class PurchaseRepository extends BaseRepository
 {
-    public function all()
+    public function __construct(Purchase $model)
     {
-        return Purchase::with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])->get();
+        parent::__construct($model);
     }
 
-    public function find($id)
+    public function all(array $columns = ['*']): Collection
     {
-        return Purchase::with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])->findOrFail($id);
+        return $this->model->with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])
+                           ->where('active', 1)
+                           ->get($columns);
+    }
+
+    public function find($id, array $columns = ['*']): ?Purchase
+    {
+        return $this->model->with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])
+                           ->where('active', 1)
+                           ->find($id, $columns);
+    }
+    
+    public function findOrFail($id, array $columns = ['*']): Purchase
+    {
+        return $this->model->with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])
+                           ->where('active', 1)
+                           ->findOrFail($id, $columns);
     }
 
     public function create(array $data): Purchase
     {
-        $details = $data['details'];
-        unset($data['details']); // Eliminar detalles antes de crear la compra principal
+        $details = $data['details'] ?? [];
+        unset($data['details']);
 
-        $purchase = Purchase::create($data);
+        $purchase = parent::create($data);
 
         foreach ($details as $detail) {
+            // Manejo de Lotes (Batches)
+            if (isset($detail['batch_number']) && isset($detail['expiration_date'])) {
+                // Buscar si el lote ya existe para ese producto, o crearlo
+                $batch = Batch::firstOrCreate(
+                    [
+                        'product_id' => $detail['product_id'],
+                        'batch_number' => $detail['batch_number']
+                    ],
+                    [
+                        'stock' => 0,
+                        'initial_stock' => 0,
+                        'expiration_date' => $detail['expiration_date'],
+                        'active' => 1,
+                        'user_created' => auth()->id() ?? 1,
+                        'user_updated' => auth()->id() ?? 1,
+                    ]
+                );
+                
+                // Incrementar el stock del lote
+                $batch->stock += $detail['quantity'];
+                $batch->initial_stock += $detail['quantity'];
+                $batch->save();
+
+                $detail['batch_id'] = $batch->id;
+            }
+
             $purchase->purchaseDetails()->create($detail);
         }
 
-        return $purchase;
+        return $purchase->load(['purchaseDetails.product']);
     }
 
-    public function update(Purchase $purchase, array $data): Purchase
+    public function update($idOrModel, array $data): Purchase
     {
-        $details = $data['details'];
+        $purchase = $idOrModel instanceof Purchase ? $idOrModel : $this->findOrFail($idOrModel);
+        
+        $details = $data['details'] ?? [];
         unset($data['details']);
 
-        $purchase->update($data);
+        parent::update($purchase, $data);
 
         // Sincronizar detalles: eliminar los que no están, actualizar los existentes, crear nuevos
         $existingDetailIds = $purchase->purchaseDetails->pluck('id')->toArray();
@@ -49,7 +95,7 @@ class PurchaseRepository
         if (!empty($detailsToDelete)) {
             PurchaseDetail::whereIn('id', $detailsToDelete)->update([
                 'active' => 0,
-                'user_updated' => $data['user_updated'],
+                'user_updated' => $data['user_updated'] ?? auth()->id() ?? 1,
                 'updated_at' => Carbon::now(),
             ]);
         }
@@ -64,15 +110,6 @@ class PurchaseRepository
             }
         }
 
-        return $purchase->load(['purchaseDetails.product']); // Recargar para obtener los detalles actualizados
-    }
-
-    public function delete(Purchase $purchase, $userId): bool
-    {
-        return $purchase->update([
-            'active' => 0,
-            'user_updated' => $userId,
-            'updated_at' => Carbon::now(),
-        ]);
+        return $purchase->load(['purchaseDetails.product']);
     }
 }

@@ -47,11 +47,11 @@ class StorageConditionService
         }
     }
 
-    public function delete(StorageCondition $storageCondition, $userId): void
+    public function delete(StorageCondition $storagecondition): void
     {
         DB::beginTransaction();
         try {
-            $this->repo->delete($storageCondition, $userId);
+            $this->repo->delete($storageCondition);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
