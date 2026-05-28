@@ -68,6 +68,7 @@ class ProductTest extends TestCase
             'type_id' => $this->type->id,
             'presentation_id' => $this->presentation->id,
             'storage_condition_id' => $this->storageCondition->id,
+            'active' => 1,
         ]);
 
         $response = $this->actingAs($this->user, 'sanctum')

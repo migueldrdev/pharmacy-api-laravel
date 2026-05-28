@@ -9,19 +9,6 @@ class ProductResource extends JsonResource
 {
     public function toArray($request)
     {
-        // Define la URL base de tu aplicación
-        // En producción, esto debería ser tu dominio (ej. 'https://tudominio.com')
-        // En desarrollo, 'http://localhost:8000' o la URL que uses.
-        $appUrl = config('app.url');
-
-        $relativePath = $this->image ? Storage::url($this->image) : null;
-
-        // Construir la URL completa
-        $fullImageUrl = null;
-        if ($relativePath) {
-            $fullImageUrl = rtrim($appUrl, '/') . $relativePath;
-        }
-
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -62,7 +49,7 @@ class ProductResource extends JsonResource
             'storage_condition_label' => $this->whenLoaded('storageCondition', function () {
                 return $this->storageCondition->label;
             }),
-            'image' => $fullImageUrl,
+            'image' => $this->image ? Storage::disk(config('filesystems.default'))->url($this->image) : null,
             // status
         ];
     }

@@ -17,6 +17,7 @@ class ProductRepository extends BaseRepository
     {
         return $this->model->with(['category', 'lab', 'type', 'presentation', 'storageCondition'])
                            ->where('active', 1)
+                           ->orderBy('name', 'asc')
                            ->get($columns);
     }
 
@@ -36,6 +37,6 @@ class ProductRepository extends BaseRepository
 
     public function getActiveForCombo(): Collection
     {
-        return $this->model->where('active', 1)->select('id', 'name')->get();
+        return $this->model->where('active', 1)->select('id', 'name')->orderBy('name', 'asc')->get();
     }
 }
