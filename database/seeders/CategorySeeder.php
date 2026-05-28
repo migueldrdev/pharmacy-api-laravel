@@ -7,13 +7,23 @@ use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        Category::factory()->count(10)->create();
+        $categories = [
+            'Analgésicos',
+            'Antibióticos',
+            'Antiinflamatorios',
+            'Antigripales',
+            'Vitaminas y Suplementos',
+            'Dermatológicos',
+            'Gastrointestinales',
+            'Cardiovasculares',
+            'Antialérgicos',
+            'Material de Curación',
+        ];
+
+        foreach ($categories as $name) {
+            Category::firstOrCreate(['name' => $name], ['active' => 1]);
+        }
     }
 }

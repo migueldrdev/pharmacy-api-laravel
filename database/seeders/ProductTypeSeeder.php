@@ -7,13 +7,18 @@ use App\Models\ProductType;
 
 class ProductTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        ProductType::factory()->count(5)->create();
+        $types = [
+            'Medicamento de Marca',
+            'Medicamento Genérico',
+            'Material Sanitario',
+            'Producto Natural',
+            'Suplemento Alimenticio',
+        ];
+
+        foreach ($types as $name) {
+            ProductType::firstOrCreate(['name' => $name], ['active' => 1]);
+        }
     }
 }

@@ -41,8 +41,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     public function create(array $data): Model
     {
-        $data['user_created'] = Auth::id() ?? 1; // Default to 1 if console/job context
-        $data['user_updated'] = Auth::id() ?? 1;
+        $userId = $this->getAuthenticatedUserId();
+        $data['user_created'] = $userId;
+        $data['user_updated'] = $userId;
         $data['active'] = 1;
         
         return $this->model->create($data);
@@ -51,7 +52,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function update($idOrModel, array $data): Model
     {
         $model = $idOrModel instanceof Model ? $idOrModel : $this->findOrFail($idOrModel);
-        $data['user_updated'] = Auth::id() ?? 1;
+        $data['user_updated'] = $this->getAuthenticatedUserId();
         
         $model->update($data);
         
@@ -67,7 +68,15 @@ abstract class BaseRepository implements BaseRepositoryInterface
         
         return $model->update([
             'active' => 0,
-            'user_updated' => Auth::id() ?? 1
+            'user_updated' => $this->getAuthenticatedUserId()
         ]);
+    }
+
+    /**
+     * Get authenticated user ID, trying sanctum guard first, then default.
+     */
+    protected function getAuthenticatedUserId(): int
+    {
+        return auth('sanctum')->id() ?? auth()->id() ?? 1;
     }
 }

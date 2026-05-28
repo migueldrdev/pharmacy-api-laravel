@@ -22,6 +22,10 @@ class Sale extends Model
         'user_updated',
     ];
 
+    protected $casts = [
+        'sale_date' => 'date',
+    ];
+
     public function client()
     {
         return $this->belongsTo(Client::class);

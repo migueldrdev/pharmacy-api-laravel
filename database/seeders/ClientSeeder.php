@@ -8,25 +8,75 @@ use App\Models\DocumentType;
 
 class ClientSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        // Asegúrate de que existan tipos de documento para asociar
-        $dniType = DocumentType::where('name', 'DNI')->first();
-        $rucType = DocumentType::where('name', 'RUC')->first();
+        $dni = DocumentType::where('code', '01')->first();
+        $ruc = DocumentType::where('code', '06')->first();
 
-        // Crear clientes con DNI
-        Client::factory()->count(20)->create([
-            'document_type_id' => $dniType ? $dniType->id : DocumentType::factory()->create(['name' => 'DNI', 'code' => '01'])->id,
-        ]);
+        $clients = [
+            [
+                'name' => 'María García López',
+                'document_number' => '12345678',
+                'document_type_id' => $dni->id,
+                'email' => 'maria.garcia@email.com',
+                'phone' => '987-654-321',
+                'address' => 'Av. Arequipa 123, Lima',
+            ],
+            [
+                'name' => 'Juan Pérez Torres',
+                'document_number' => '87654321',
+                'document_type_id' => $dni->id,
+                'email' => 'juan.perez@email.com',
+                'phone' => '987-123-456',
+                'address' => 'Jr. Cusco 456, Lima',
+            ],
+            [
+                'name' => 'Rosa Fernández Díaz',
+                'document_number' => '45678912',
+                'document_type_id' => $dni->id,
+                'email' => 'rosa.fernandez@email.com',
+                'phone' => '987-789-123',
+                'address' => 'Calle Lima 789, Callao',
+            ],
+            [
+                'name' => 'Carlos Martínez Ruiz',
+                'document_number' => '34567891',
+                'document_type_id' => $dni->id,
+                'email' => 'carlos.martinez@email.com',
+                'phone' => '987-456-789',
+                'address' => 'Av. Brasil 321, Lima',
+            ],
+            [
+                'name' => 'Ana Sánchez Vega',
+                'document_number' => '23456789',
+                'document_type_id' => $dni->id,
+                'email' => 'ana.sanchez@email.com',
+                'phone' => '987-321-654',
+                'address' => 'Jr. Huancayo 654, Lima',
+            ],
+            [
+                'name' => 'Farmacia Salud y Vida',
+                'document_number' => '20123456789',
+                'document_type_id' => $ruc->id,
+                'email' => 'contacto@farmaciasaludyvida.com',
+                'phone' => '01-456-7890',
+                'address' => 'Av. Javier Prado 890, Lima',
+            ],
+            [
+                'name' => 'Boticas del Centro',
+                'document_number' => '20987654321',
+                'document_type_id' => $ruc->id,
+                'email' => 'ventas@boticasdelcentro.com',
+                'phone' => '01-345-6789',
+                'address' => 'Jr. Abancay 567, Lima',
+            ],
+        ];
 
-        // Crear clientes con RUC usando el estado 'ruc' del factory
-        Client::factory()->count(5)->ruc()->create([
-            'document_type_id' => $rucType ? $rucType->id : DocumentType::factory()->create(['name' => 'RUC', 'code' => '06'])->id,
-        ]);
+        foreach ($clients as $data) {
+            Client::firstOrCreate(
+                ['document_number' => $data['document_number']],
+                array_merge($data, ['active' => 1])
+            );
+        }
     }
 }

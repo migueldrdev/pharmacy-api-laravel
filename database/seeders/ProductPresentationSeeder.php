@@ -7,13 +7,20 @@ use App\Models\ProductPresentation;
 
 class ProductPresentationSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        ProductPresentation::factory()->count(7)->create();
+        $presentations = [
+            'Caja x 10 tabletas',
+            'Caja x 20 tabletas',
+            'Caja x 30 tabletas',
+            'Frasco x 120 ml',
+            'Blíster x 10 cápsulas',
+            'Tubo x 30 g',
+            'Unidad',
+        ];
+
+        foreach ($presentations as $name) {
+            ProductPresentation::firstOrCreate(['name' => $name], ['active' => 1]);
+        }
     }
 }

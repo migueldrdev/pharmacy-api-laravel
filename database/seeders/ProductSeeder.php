@@ -8,46 +8,490 @@ use App\Models\Category;
 use App\Models\Lab;
 use App\Models\ProductType;
 use App\Models\ProductPresentation;
+use App\Models\StorageCondition;
+use App\Models\User;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        // Asegúrate de que existan las dependencias antes de crear productos
-        $categories = Category::all();
-        $labs = Lab::all();
-        $productTypes = ProductType::all();
-        $productPresentations = ProductPresentation::all();
+        $categories = $this->ensureDependencies(Category::class, CategorySeeder::class);
+        $labs = $this->ensureDependencies(Lab::class, LabSeeder::class);
+        $types = $this->ensureDependencies(ProductType::class, ProductTypeSeeder::class);
+        $presentations = $this->ensureDependencies(ProductPresentation::class, ProductPresentationSeeder::class);
+        $storageConditions = $this->ensureDependencies(StorageCondition::class, StorageConditionSeeder::class);
+        $user = User::first() ?? User::factory()->create();
 
-        if ($categories->isEmpty()) {
-            $this->call(CategorySeeder::class);
-            $categories = Category::all();
+        $products = [
+            // Analgésicos
+            [
+                'name' => 'Paracetamol 500 mg',
+                'code' => 'PRD00001',
+                'description' => 'Analgésico y antipirético de uso común.',
+                'stock' => 120,
+                'min_stock' => 20,
+                'max_stock' => 200,
+                'price' => 3.50,
+                'expiration_date' => '2027-06-15',
+                'concentration' => '500mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Analgésicos',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 20 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Ibuprofeno 400 mg',
+                'code' => 'PRD00002',
+                'description' => 'Antiinflamatorio no esteroideo.',
+                'stock' => 8,
+                'min_stock' => 15,
+                'max_stock' => 150,
+                'price' => 5.00,
+                'expiration_date' => '2026-08-20',
+                'concentration' => '400mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antiinflamatorios',
+                'lab_name' => 'Pfizer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 20 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Naproxeno 550 mg',
+                'code' => 'PRD00003',
+                'description' => 'Antiinflamatorio de acción prolongada.',
+                'stock' => 45,
+                'min_stock' => 10,
+                'max_stock' => 100,
+                'price' => 12.00,
+                'expiration_date' => '2027-01-10',
+                'concentration' => '550mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Analgésicos',
+                'lab_name' => 'Bayer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Antibióticos
+            [
+                'name' => 'Amoxicilina 500 mg',
+                'code' => 'PRD00004',
+                'description' => 'Antibiótico de amplio espectro.',
+                'stock' => 90,
+                'min_stock' => 20,
+                'max_stock' => 200,
+                'price' => 8.00,
+                'expiration_date' => '2027-12-01',
+                'concentration' => '500mg',
+                'pharmaceutical_form' => 'Cápsula',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antibióticos',
+                'lab_name' => 'GlaxoSmithKline',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Azitromicina 500 mg',
+                'code' => 'PRD00005',
+                'description' => 'Antibiótico macrólido para infecciones respiratorias.',
+                'stock' => 60,
+                'min_stock' => 10,
+                'max_stock' => 120,
+                'price' => 15.00,
+                'expiration_date' => '2027-03-15',
+                'concentration' => '500mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antibióticos',
+                'lab_name' => 'Pfizer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Ciprofloxacino 500 mg',
+                'code' => 'PRD00006',
+                'description' => 'Antibiótico de amplio espectro para infecciones urinarias.',
+                'stock' => 3,
+                'min_stock' => 10,
+                'max_stock' => 100,
+                'price' => 7.50,
+                'expiration_date' => '2026-09-30',
+                'concentration' => '500mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antibióticos',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Antigripales
+            [
+                'name' => 'Antigripal Forte',
+                'code' => 'PRD00007',
+                'description' => 'Antigripal con vitamina C.',
+                'stock' => 200,
+                'min_stock' => 30,
+                'max_stock' => 300,
+                'price' => 4.50,
+                'expiration_date' => '2027-07-10',
+                'concentration' => '',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antigripales',
+                'lab_name' => 'Bayer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 20 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Vitaminas
+            [
+                'name' => 'Vitamina C 1000 mg',
+                'code' => 'PRD00008',
+                'description' => 'Suplemento de vitamina C efervescente.',
+                'stock' => 150,
+                'min_stock' => 25,
+                'max_stock' => 250,
+                'price' => 6.00,
+                'expiration_date' => '2028-01-01',
+                'concentration' => '1000mg',
+                'pharmaceutical_form' => 'Tableta Efervescente',
+                'administration_route' => 'Oral',
+                'category_name' => 'Vitaminas y Suplementos',
+                'lab_name' => 'Roche',
+                'type_name' => 'Suplemento Alimenticio',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'dry_place',
+            ],
+            [
+                'name' => 'Calcio + Vitamina D',
+                'code' => 'PRD00009',
+                'description' => 'Suplemento para la salud ósea.',
+                'stock' => 80,
+                'min_stock' => 15,
+                'max_stock' => 150,
+                'price' => 10.00,
+                'expiration_date' => '2027-11-20',
+                'concentration' => '600mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Vitaminas y Suplementos',
+                'lab_name' => 'Sanofi',
+                'type_name' => 'Suplemento Alimenticio',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Dermatológicos
+            [
+                'name' => 'Crema Hidratante Urea 10%',
+                'code' => 'PRD00010',
+                'description' => 'Crema hidratante para piel seca.',
+                'stock' => 4,
+                'min_stock' => 8,
+                'max_stock' => 60,
+                'price' => 12.00,
+                'expiration_date' => '2026-06-15',
+                'concentration' => '10%',
+                'pharmaceutical_form' => 'Crema',
+                'administration_route' => 'Tópica',
+                'category_name' => 'Dermatológicos',
+                'lab_name' => 'Merck',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Tubo x 30 g',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Miconazol Crema 2%',
+                'code' => 'PRD00011',
+                'description' => 'Antimicótico tópico de amplio espectro.',
+                'stock' => 35,
+                'min_stock' => 5,
+                'max_stock' => 50,
+                'price' => 8.50,
+                'expiration_date' => '2027-05-01',
+                'concentration' => '2%',
+                'pharmaceutical_form' => 'Crema',
+                'administration_route' => 'Tópica',
+                'category_name' => 'Dermatológicos',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Tubo x 30 g',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Gastrointestinales
+            [
+                'name' => 'Omeprazol 20 mg',
+                'code' => 'PRD00012',
+                'description' => 'Inhibidor de la bomba de protones para acidez estomacal.',
+                'stock' => 5,
+                'min_stock' => 15,
+                'max_stock' => 120,
+                'price' => 6.50,
+                'expiration_date' => '2026-07-25',
+                'concentration' => '20mg',
+                'pharmaceutical_form' => 'Cápsula',
+                'administration_route' => 'Oral',
+                'category_name' => 'Gastrointestinales',
+                'lab_name' => 'Novartis',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Ranitidina 150 mg',
+                'code' => 'PRD00013',
+                'description' => 'Antiácido y protector gástrico.',
+                'stock' => 70,
+                'min_stock' => 10,
+                'max_stock' => 100,
+                'price' => 5.00,
+                'expiration_date' => '2027-09-10',
+                'concentration' => '150mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Gastrointestinales',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 20 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Cardiovasculares
+            [
+                'name' => 'Losartán 50 mg',
+                'code' => 'PRD00014',
+                'description' => 'Antihipertensivo.',
+                'stock' => 95,
+                'min_stock' => 15,
+                'max_stock' => 150,
+                'price' => 11.00,
+                'expiration_date' => '2027-04-20',
+                'concentration' => '50mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Cardiovasculares',
+                'lab_name' => 'Sanofi',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Enalapril 10 mg',
+                'code' => 'PRD00015',
+                'description' => 'Antihipertensivo IECA.',
+                'stock' => 2,
+                'min_stock' => 10,
+                'max_stock' => 100,
+                'price' => 4.00,
+                'expiration_date' => '2026-05-30',
+                'concentration' => '10mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Cardiovasculares',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 20 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Antialérgicos
+            [
+                'name' => 'Loratadina 10 mg',
+                'code' => 'PRD00016',
+                'description' => 'Antihistamínico no sedante.',
+                'stock' => 110,
+                'min_stock' => 15,
+                'max_stock' => 200,
+                'price' => 5.50,
+                'expiration_date' => '2027-08-12',
+                'concentration' => '10mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antialérgicos',
+                'lab_name' => 'Bayer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Cetirizina 10 mg',
+                'code' => 'PRD00017',
+                'description' => 'Antihistamínico de segunda generación.',
+                'stock' => 85,
+                'min_stock' => 10,
+                'max_stock' => 120,
+                'price' => 4.50,
+                'expiration_date' => '2027-06-30',
+                'concentration' => '10mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antialérgicos',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Medicamento Genérico',
+                'presentation_name' => 'Caja x 10 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Jarabes
+            [
+                'name' => 'Jarabe para la Tos',
+                'code' => 'PRD00018',
+                'description' => 'Antitusivo y expectorante.',
+                'stock' => 40,
+                'min_stock' => 10,
+                'max_stock' => 80,
+                'price' => 9.50,
+                'expiration_date' => '2027-02-28',
+                'concentration' => '120ml',
+                'pharmaceutical_form' => 'Jarabe',
+                'administration_route' => 'Oral',
+                'category_name' => 'Antigripales',
+                'lab_name' => 'Roche',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Frasco x 120 ml',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            [
+                'name' => 'Insulina Glargina',
+                'code' => 'PRD00019',
+                'description' => 'Insulina de acción prolongada.',
+                'stock' => 25,
+                'min_stock' => 5,
+                'max_stock' => 50,
+                'price' => 45.00,
+                'expiration_date' => '2027-10-15',
+                'concentration' => '100UI/ml',
+                'pharmaceutical_form' => 'Inyectable',
+                'administration_route' => 'Inyectable',
+                'category_name' => 'Cardiovasculares',
+                'lab_name' => 'Sanofi',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Unidad',
+                'storage_condition_value' => 'refrigerated',
+            ],
+            // Material de curación
+            [
+                'name' => 'Gasas Estériles 10x10 cm',
+                'code' => 'PRD00020',
+                'description' => 'Gasas de algodón para curación de heridas.',
+                'stock' => 300,
+                'min_stock' => 50,
+                'max_stock' => 500,
+                'price' => 2.00,
+                'expiration_date' => '2029-01-01',
+                'concentration' => '',
+                'pharmaceutical_form' => '',
+                'administration_route' => 'Tópica',
+                'category_name' => 'Material de Curación',
+                'lab_name' => 'Merck',
+                'type_name' => 'Material Sanitario',
+                'presentation_name' => 'Unidad',
+                'storage_condition_value' => 'dry_place',
+            ],
+            [
+                'name' => 'Alcohol Medicinal 70°',
+                'code' => 'PRD00021',
+                'description' => 'Solución antiséptica para uso tópico.',
+                'stock' => 180,
+                'min_stock' => 20,
+                'max_stock' => 300,
+                'price' => 3.50,
+                'expiration_date' => '2028-03-15',
+                'concentration' => '70%',
+                'pharmaceutical_form' => 'Solución',
+                'administration_route' => 'Tópica',
+                'category_name' => 'Material de Curación',
+                'lab_name' => 'Genéricos Nacionales',
+                'type_name' => 'Material Sanitario',
+                'presentation_name' => 'Frasco x 120 ml',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Producto con stock bajo para alertas visibles
+            [
+                'name' => 'Ácido Acetilsalicílico 100 mg',
+                'code' => 'PRD00022',
+                'description' => 'Antiagregante plaquetario para prevención cardiovascular.',
+                'stock' => 2,
+                'min_stock' => 20,
+                'max_stock' => 150,
+                'price' => 3.00,
+                'expiration_date' => '2027-11-05',
+                'concentration' => '100mg',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Cardiovasculares',
+                'lab_name' => 'Bayer',
+                'type_name' => 'Medicamento de Marca',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+            // Producto sin rotación (stock muerto)
+            [
+                'name' => 'Multivitamínico Complejo B',
+                'code' => 'PRD00023',
+                'description' => 'Suplemento de complejo vitamínico B.',
+                'stock' => 200,
+                'min_stock' => 10,
+                'max_stock' => 250,
+                'price' => 25.00,
+                'expiration_date' => '2028-06-01',
+                'concentration' => '',
+                'pharmaceutical_form' => 'Tableta',
+                'administration_route' => 'Oral',
+                'category_name' => 'Vitaminas y Suplementos',
+                'lab_name' => 'Roche',
+                'type_name' => 'Suplemento Alimenticio',
+                'presentation_name' => 'Caja x 30 tabletas',
+                'storage_condition_value' => 'room_temperature',
+            ],
+        ];
+
+        foreach ($products as $data) {
+            $category = $categories->firstWhere('name', $data['category_name']);
+            $lab = $labs->firstWhere('name', $data['lab_name']);
+            $type = $types->firstWhere('name', $data['type_name']);
+            $presentation = $presentations->firstWhere('name', $data['presentation_name']);
+            $storageCondition = $storageConditions->firstWhere('value', $data['storage_condition_value']);
+
+            Product::firstOrCreate(
+                ['code' => $data['code']],
+                [
+                    'name' => $data['name'],
+                    'description' => $data['description'],
+                    'stock' => $data['stock'],
+                    'min_stock' => $data['min_stock'],
+                    'max_stock' => $data['max_stock'],
+                    'price' => $data['price'],
+                    'expiration_date' => $data['expiration_date'],
+                    'concentration' => $data['concentration'],
+                    'pharmaceutical_form' => $data['pharmaceutical_form'],
+                    'administration_route' => $data['administration_route'],
+                    'category_id' => $category->id,
+                    'lab_id' => $lab->id,
+                    'type_id' => $type->id,
+                    'presentation_id' => $presentation->id,
+                    'storage_condition_id' => $storageCondition->id,
+                    'user_created' => $user->id,
+                    'active' => 1,
+                ]
+            );
         }
-        if ($labs->isEmpty()) {
-            $this->call(LabSeeder::class);
-            $labs = Lab::all();
-        }
-        if ($productTypes->isEmpty()) {
-            $this->call(ProductTypeSeeder::class);
-            $productTypes = ProductType::all();
-        }
-        if ($productPresentations->isEmpty()) {
-            $this->call(ProductPresentationSeeder::class);
-            $productPresentations = ProductPresentation::all();
+    }
+
+    private function ensureDependencies(string $modelClass, string $seederClass)
+    {
+        $records = $modelClass::all();
+
+        if ($records->isEmpty()) {
+            $this->call($seederClass);
+            $records = $modelClass::all();
         }
 
-        // Crear productos, asociando con IDs existentes
-        Product::factory()->count(50)->create([
-            'category_id' => $categories->random()->id,
-            'lab_id' => $labs->random()->id,
-            'type_id' => $productTypes->random()->id,
-            'presentation_id' => $productPresentations->random()->id,
-            'user_created' => \App\Models\User::first()->id, // Asigna al primer usuario creado
-        ]);
+        return $records;
     }
 }

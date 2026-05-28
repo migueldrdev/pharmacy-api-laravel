@@ -7,13 +7,21 @@ use App\Models\Lab;
 
 class LabSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        Lab::factory()->count(8)->create();
+        $labs = [
+            'Bayer',
+            'Pfizer',
+            'Roche',
+            'Novartis',
+            'Sanofi',
+            'GlaxoSmithKline',
+            'Merck',
+            'Genéricos Nacionales',
+        ];
+
+        foreach ($labs as $name) {
+            Lab::firstOrCreate(['name' => $name], ['active' => 1]);
+        }
     }
 }

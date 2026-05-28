@@ -12,6 +12,7 @@ class PurchaseDetail extends Model
     protected $fillable = [
         'purchase_id',
         'product_id',
+        'batch_id',
         'quantity',
         'price',
         'subtotal',

@@ -8,27 +8,19 @@ use App\Models\Product;
 use App\Models\Client;
 use App\Models\DocumentType;
 use App\Models\User;
-use Faker\Generator as Faker; // Importar la clase Faker
+use App\Models\Batch;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SaleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        // Instanciar Faker para usarlo dentro del seeder
-        $faker = app(Faker::class);
-
         $products = Product::all();
         $clients = Client::all();
         $documentTypes = DocumentType::all();
-        $users = User::all();
+        $user = User::first();
 
-        // Asegúrate de que existan las dependencias si las colecciones están vacías
-        // (Esto es una buena práctica para seeders que dependen de otros)
         if ($products->isEmpty()) {
             $this->call(ProductSeeder::class);
             $products = Product::all();
@@ -37,54 +29,158 @@ class SaleSeeder extends Seeder
             $this->call(ClientSeeder::class);
             $clients = Client::all();
         }
-        if ($documentTypes->isEmpty()) {
-            $this->call(DocumentTypeSeeder::class);
-            $documentTypes = DocumentType::all();
-        }
-        if ($users->isEmpty()) {
-            $this->call(UserSeeder::class);
-            $users = User::all();
-        }
 
-        Sale::factory()->count(30)->make()->each(function ($sale) use ($products, $clients, $documentTypes, $users, $faker) { // Pasar $faker al closure
-            // Asigna IDs reales de las relaciones
-            $sale->user_id = $users->random()->id;
-            $sale->user_created = $users->random()->id;
+        Auth::loginUsingId($user->id);
 
-            // Lógica para asignar client_id o document_type_id/document_number/customer_name
-            if ($faker->boolean(70) && $clients->isNotEmpty()) { // Usar $faker aquí
-                $sale->client_id = $clients->random()->id;
-                $sale->document_type_id = null;
-                $sale->document_number = null;
-                $sale->customer_name = null;
+        $sales = [
+            [
+                'client_name' => 'María García López',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00001', 'quantity' => 3],
+                    ['product_code' => 'PRD00004', 'quantity' => 2],
+                ],
+            ],
+            [
+                'client_name' => 'Juan Pérez Torres',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00007', 'quantity' => 5],
+                    ['product_code' => 'PRD00002', 'quantity' => 2],
+                    ['product_code' => 'PRD00012', 'quantity' => 1],
+                ],
+            ],
+            [
+                'client_name' => null,
+                'document_type_code' => '01',
+                'customer_name' => 'Pedro Alvarado',
+                'document_number' => '44556677',
+                'details' => [
+                    ['product_code' => 'PRD00006', 'quantity' => 2],
+                    ['product_code' => 'PRD00017', 'quantity' => 3],
+                ],
+            ],
+            [
+                'client_name' => 'Rosa Fernández Díaz',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00001', 'quantity' => 5],
+                    ['product_code' => 'PRD00008', 'quantity' => 3],
+                    ['product_code' => 'PRD00009', 'quantity' => 2],
+                ],
+            ],
+            [
+                'client_name' => 'Farmacia Salud y Vida',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00001', 'quantity' => 10],
+                    ['product_code' => 'PRD00004', 'quantity' => 8],
+                    ['product_code' => 'PRD00007', 'quantity' => 15],
+                    ['product_code' => 'PRD00020', 'quantity' => 50],
+                ],
+            ],
+            [
+                'client_name' => null,
+                'document_type_code' => '01',
+                'customer_name' => 'Lucía Rojas',
+                'document_number' => '55667788',
+                'details' => [
+                    ['product_code' => 'PRD00001', 'quantity' => 2],
+                    ['product_code' => 'PRD00007', 'quantity' => 2],
+                    ['product_code' => 'PRD00021', 'quantity' => 5],
+                ],
+            ],
+            [
+                'client_name' => 'Carlos Martínez Ruiz',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00002', 'quantity' => 3],
+                    ['product_code' => 'PRD00005', 'quantity' => 2],
+                ],
+            ],
+            [
+                'client_name' => 'Boticas del Centro',
+                'document_type_code' => null,
+                'details' => [
+                    ['product_code' => 'PRD00004', 'quantity' => 10],
+                    ['product_code' => 'PRD00013', 'quantity' => 5],
+                    ['product_code' => 'PRD00022', 'quantity' => 2],
+                ],
+            ],
+        ];
+
+        foreach ($sales as $saleData) {
+            $client = null;
+            $docType = null;
+            $customerName = null;
+            $documentNumber = null;
+
+            if ($saleData['client_name']) {
+                $client = $clients->firstWhere('name', $saleData['client_name']);
             } else {
-                $sale->client_id = null;
-                $sale->document_type_id = $documentTypes->random()->id;
-                $sale->document_number = $faker->numerify('########'); // Usar $faker aquí
-                $sale->customer_name = $faker->name(); // Usar $faker aquí
+                $docType = $documentTypes->firstWhere('code', $saleData['document_type_code']);
+                $customerName = $saleData['customer_name'] ?? null;
+                $documentNumber = $saleData['document_number'] ?? null;
             }
 
-            $sale->save(); // Guarda la venta principal
+            $sale = Sale::create([
+                'client_id' => $client?->id,
+                'document_type_id' => $docType?->id,
+                'customer_name' => $customerName,
+                'document_number' => $documentNumber,
+                'sale_date' => now()->subDays(rand(1, 30)),
+                'total' => 0,
+                'user_id' => $user->id,
+                'user_created' => $user->id,
+                'user_updated' => $user->id,
+                'active' => 1,
+            ]);
 
-            // Crear entre 1 y 5 detalles de venta para cada venta
-            $numberOfDetails = $faker->numberBetween(1, 5); // Usar $faker aquí
-            for ($i = 0; $i < $numberOfDetails; $i++) {
-                $product = $products->random();
-                $quantity = $faker->numberBetween(1, 5); // Usar $faker aquí
-                $price = $product->price; // Usa el precio del producto
+            $total = 0;
+
+            foreach ($saleData['details'] as $d) {
+                $product = $products->firstWhere('code', $d['product_code']);
+                $quantity = $d['quantity'];
+                $price = $product->price;
                 $subtotal = $quantity * $price;
+                $total += $subtotal;
 
-                $sale->saleDetails()->create([
+                $saleDetail = $sale->saleDetails()->create([
                     'product_id' => $product->id,
                     'quantity' => $quantity,
                     'price' => $price,
                     'subtotal' => $subtotal,
                 ]);
+
+                // Aplicar FIFO: descontar lotes más próximos a vencer
+                $remaining = $quantity;
+                $batches = Batch::where('product_id', $product->id)
+                    ->where('stock', '>', 0)
+                    ->where('active', 1)
+                    ->orderBy('expiration_date', 'asc')
+                    ->get();
+
+                foreach ($batches as $batch) {
+                    if ($remaining <= 0) break;
+
+                    $take = min($batch->stock, $remaining);
+                    $batch->stock -= $take;
+                    $batch->save();
+
+                    DB::table('batch_sale_detail')->insert([
+                        'sale_detail_id' => $saleDetail->id,
+                        'batch_id' => $batch->id,
+                        'quantity' => $take,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $remaining -= $take;
+                }
             }
 
-            // Recalcular el total de la venta basado en los detalles creados
-            $sale->total = $sale->saleDetails->sum('subtotal');
+            $sale->total = $total;
             $sale->save();
-        });
+        }
     }
 }

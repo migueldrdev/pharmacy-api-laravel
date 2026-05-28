@@ -42,6 +42,8 @@ class PurchaseRepository extends BaseRepository
         $details = $data['details'] ?? [];
         unset($data['details']);
 
+        $data['user_id'] = $this->getAuthenticatedUserId();
+
         $purchase = parent::create($data);
 
         foreach ($details as $detail) {
@@ -58,8 +60,8 @@ class PurchaseRepository extends BaseRepository
                         'initial_stock' => 0,
                         'expiration_date' => $detail['expiration_date'],
                         'active' => 1,
-                        'user_created' => auth()->id() ?? 1,
-                        'user_updated' => auth()->id() ?? 1,
+                        'user_created' => $this->getAuthenticatedUserId(),
+                        'user_updated' => $this->getAuthenticatedUserId(),
                     ]
                 );
                 
@@ -70,6 +72,8 @@ class PurchaseRepository extends BaseRepository
 
                 $detail['batch_id'] = $batch->id;
             }
+
+            unset($detail['batch_number'], $detail['expiration_date']);
 
             $purchase->purchaseDetails()->create($detail);
         }
@@ -95,7 +99,7 @@ class PurchaseRepository extends BaseRepository
         if (!empty($detailsToDelete)) {
             PurchaseDetail::whereIn('id', $detailsToDelete)->update([
                 'active' => 0,
-                'user_updated' => $data['user_updated'] ?? auth()->id() ?? 1,
+                'user_updated' => $data['user_updated'] ?? $this->getAuthenticatedUserId(),
                 'updated_at' => Carbon::now(),
             ]);
         }

@@ -4,23 +4,26 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\DocumentType;
+use App\Models\User;
 
 class DocumentTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        // Asegúrate de que los tipos de documento básicos existan
-        DocumentType::firstOrCreate(['name' => 'DNI', 'code' => '01'], ['active' => true, 'user_created' => \App\Models\User::first()->id]);
-        DocumentType::firstOrCreate(['name' => 'RUC', 'code' => '06'], ['active' => true, 'user_created' => \App\Models\User::first()->id]);
-        DocumentType::firstOrCreate(['name' => 'Pasaporte', 'code' => '04'], ['active' => true, 'user_created' => \App\Models\User::first()->id]);
-        DocumentType::firstOrCreate(['name' => 'Cédula de Identidad', 'code' => '03'], ['active' => true, 'user_created' => \App\Models\User::first()->id]);
+        $userId = User::first()?->id ?? 1;
 
-        // Crear algunos tipos de documento adicionales usando el factory
-        // DocumentType::factory()->count(3)->create();
+        $types = [
+            ['name' => 'DNI', 'code' => '01'],
+            ['name' => 'RUC', 'code' => '06'],
+            ['name' => 'Pasaporte', 'code' => '04'],
+            ['name' => 'Cédula de Identidad', 'code' => '03'],
+        ];
+
+        foreach ($types as $type) {
+            DocumentType::firstOrCreate(
+                ['code' => $type['code']],
+                ['name' => $type['name'], 'active' => 1, 'user_created' => $userId]
+            );
+        }
     }
 }

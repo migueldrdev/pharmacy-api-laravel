@@ -8,16 +8,21 @@ use App\Models\User;
 
 class PurchaseDocumentTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        PurchaseDocumentType::firstOrCreate(['name' => 'Factura', 'code' => '01'], ['active' => true, 'user_created' => User::first()->id]);
-        PurchaseDocumentType::firstOrCreate(['name' => 'Boleta', 'code' => '03'], ['active' => true, 'user_created' => User::first()->id]);
-        PurchaseDocumentType::firstOrCreate(['name' => 'Nota de Crédito', 'code' => '07'], ['active' => true, 'user_created' => User::first()->id]);
-        PurchaseDocumentType::factory()->count(3)->create();
+        $userId = User::first()?->id ?? 1;
+
+        $types = [
+            ['name' => 'Factura', 'code' => '01'],
+            ['name' => 'Boleta', 'code' => '03'],
+            ['name' => 'Nota de Crédito', 'code' => '07'],
+        ];
+
+        foreach ($types as $type) {
+            PurchaseDocumentType::firstOrCreate(
+                ['code' => $type['code']],
+                ['name' => $type['name'], 'active' => 1, 'user_created' => $userId]
+            );
+        }
     }
 }

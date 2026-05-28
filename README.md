@@ -1,61 +1,224 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 💊 FarmaERP — ERP Farmacéutico Inteligente para PyMEs
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Sail-2496ED?logo=docker&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-21%2F21-brightgreen)
 
-## About Laravel
+## 🎯 ¿Qué es FarmaERP?
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Un **sistema de gestión farmacéutica (ERP + Punto de Venta)** diseñado específicamente para **pequeñas y medianas farmacias locales**. A diferencia de un sistema de ventas genérico, **FarmaERP** entiende la naturaleza crítica de los medicamentos:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 🔬 **Trazabilidad por Lotes:** cada medicamento se rastrea desde que entra hasta que se vende
+- ⏰ **Algoritmo FIFO:** al vender, el sistema descuenta automáticamente los lotes más próximos a vencer
+- 🤖 **Inteligencia Artificial:** predicción de demanda y sugerencias de reabastecimiento
+- 📊 **Alertas inteligentes:** vencimientos próximos, stock bajo, productos sin rotación
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🎯 Público objetivo
 
-## Learning Laravel
+Dueños y administradores de **farmacias independientes** y **cadenas pequeñas** que quieren:
+- Reducir mermas por caducidad 💸
+- Evitar quiebres de stock ❌
+- Optimizar compras con predicciones 📈
+- Tener control total sin depender de un contador externo
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🧱 Stack Tecnológico (Zero-Cost Mindset)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Tecnología | Rol | Logo |
+|-----------|-----|------|
+| **Laravel 12** | API REST backend | ⚡ |
+| **PHP 8.4** | Lenguaje | 🐘 |
+| **PostgreSQL 17** | Base de datos principal | 🐘 |
+| **Redis** | Colas, caché, sesiones | 🔴 |
+| **Laravel Horizon** | Dashboard de jobs en background | 📊 |
+| **Laravel Sanctum** | Autenticación por tokens | 🔐 |
+| **MinIO** | Almacenamiento S3 local (desarrollo) | 🪣 |
+| **Cloudflare R2 / Backblaze B2** | Almacenamiento S3 en producción | ☁️ |
+| **Gemini 1.5 Flash (Google AI)** | Predicción de demanda con IA | 🤖 |
+| **Docker + Laravel Sail** | Entorno de desarrollo | 🐳 |
+| **PHPUnit** | Testing automatizado | ✅ |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Cómo levantar el proyecto
 
-### Premium Partners
+### Requisitos
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Docker** y **Docker Compose** instalados
+- Git
 
-## Contributing
+### 1. Clonar e instalar
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone git@github.com:migueldrdev/pharmacy-api-laravel.git
+cd pharmacy-api-laravel
+cp .env.example .env
+```
 
-## Code of Conduct
+### 2. Instalar dependencias (opcional, Sail lo hace)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+docker run --rm \
+  -v $(pwd):/var/www/html \
+  -w /var/www/html \
+  laravelsail/php84-composer:latest \
+  composer install --ignore-platform-reqs
+```
 
-## Security Vulnerabilities
+### 3. Levantar contenedores
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+./vendor/bin/sail up -d
+```
 
-## License
+Esto arranca: **PHP 8.4**, **PostgreSQL**, **Redis**, **MinIO**.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Generar clave de la aplicación
+
+```bash
+./vendor/bin/sail artisan key:generate
+```
+
+### 5. Migrar y sembrar la base de datos
+
+```bash
+./vendor/bin/sail artisan migrate:fresh --seed
+```
+
+Esto crea todas las tablas y siembra:
+- 2 roles (Administrador, Cajero)
+- 2 usuarios demo
+- 10 categorías de medicamentos
+- 8 laboratorios reales
+- 23 productos farmacéuticos reales
+- 7 clientes
+- 5 proveedores
+- 5 compras con lotes
+- 8 ventas con trazabilidad FIFO
+
+### 6. MinIO (Bucket de imágenes)
+
+El bucket se debe recrear cada vez que se hace `sail down -v`:
+
+```bash
+./vendor/bin/sail exec minio sh -c "mc alias set myminio http://localhost:9000 sail password && mc mb myminio/local && mc anonymous set public myminio/local"
+```
+
+### 7. Horizon (Colas y Jobs)
+
+```bash
+./vendor/bin/sail artisan horizon
+```
+
+### 8. Accesos
+
+| Servicio | URL | Usuario | Contraseña |
+|---------|-----|---------|-----------|
+| **API** | `http://localhost/api/v1/` | — | — |
+| **Horizon** | `http://localhost/horizon` | — | — |
+| **MinIO** | `http://localhost:8900` | `sail` | `password` |
+| **PostgreSQL** | `localhost:5432` | `admin` | `password` |
+
+### 9. Usuarios demo
+
+| Email | Contraseña | Rol |
+|-------|-----------|-----|
+| `admin@farmacia.com` | `admin123` | Administrador |
+| `cajero@farmacia.com` | `cajero123` | Cajero |
+
+---
+
+## 🧪 Tests
+
+```bash
+# Todos los tests (21 tests, 53 assertions)
+./vendor/bin/sail artisan test
+
+# Solo Feature
+./vendor/bin/sail artisan test --testsuite=Feature
+
+# Solo Unit
+./vendor/bin/sail artisan test --testsuite=Unit
+```
+
+---
+
+## 📁 Arquitectura del Proyecto
+
+```
+app/
+├── Contracts/          # Interfaces (AiPredictionInterface)
+├── Helpers/            # ResponseHelper
+├── Http/
+│   ├── Controllers/Api/  # Solo manejan HTTP, validan, responden
+│   ├── Requests/         # Form Requests con validación
+│   └── Resources/        # API Resources para transformar datos
+├── Jobs/               # Jobs asíncronos (alertas, predicciones IA)
+├── Models/             # Modelos Eloquent
+├── Providers/          # Service Providers (App, Horizon)
+├── Repositories/       # Acceso a datos (Eloquent)
+│   ├── BaseRepository.php         # Soft deletes, user_created/updated
+│   ├── Contracts/                 # Interfaces de repositorios
+│   └── {Module}/                  # Repositorios por módulo
+└── Services/           # Lógica de negocio y transacciones
+    ├── Ai/             # Adaptadores de IA (GeminiAdapter)
+    └── Prediction/     # Servicio de predicción de demanda
+```
+
+**Patrón:** Controller → Service → Repository → Model
+
+**Principios:**
+- Controladores **NO** tocan Eloquent ni lógica de negocio
+- Servicios manejan transacciones (`DB::beginTransaction`)
+- Repositorios son la **única** capa que consulta la BD
+- Soft deletes custom (`active = 0`) en vez del Trait de Laravel
+
+---
+
+## 📚 Documentación
+
+- [Modelo de Negocio](docs/superpowers/specs/2026-05-25-business-model.md)
+- [Diseño Técnico y Arquitectura](docs/superpowers/specs/2026-05-25-technical-design.md)
+- [Estrategia de Datos (Seeders)](docs/superpowers/specs/2026-05-27-data-seeding-strategy.md)
+- [Estrategia de Testing](docs/superpowers/specs/2026-05-27-testing-strategy.md)
+
+---
+
+## 🔑 Comandos útiles
+
+```bash
+# Ejecutar el scheduler cada minuto (desarrollo)
+./vendor/bin/sail artisan schedule:work
+
+# Forzar generación de predicciones IA ahora
+./vendor/bin/sail artisan queue:work
+
+# Limpiar caché
+./vendor/bin/sail artisan optimize:clear
+
+# Listar rutas
+./vendor/bin/sail artisan route:list --path=api
+
+# Tinker (consola interactiva)
+./vendor/bin/sail artisan tinker
+```
+
+---
+
+## 💡 ¿Qué hace especial a este sistema?
+
+1. **FIFO Automático:** cada venta consume primero los lotes que caducan antes
+2. **IA Predictiva:** Gemini analiza el histórico de ventas y sugiere qué comprar
+3. **Costo Cero Operativo:** diseñado para correr en un VPS de $5/mes
+4. **Arquitectura Limpia:** fácil de extender y testear
+5. **100% en español:** datos, mensajes, validaciones y documentación
+
+---
+
+## 📄 Licencia
+
+MIT — Ver archivo [LICENSE](LICENSE) para más detalles.

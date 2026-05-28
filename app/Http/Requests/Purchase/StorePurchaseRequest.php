@@ -26,6 +26,8 @@ class StorePurchaseRequest extends BaseFormRequest
             'details.*.quantity' => ['required', 'integer', 'min:1'],
             'details.*.price' => ['required', 'numeric', 'min:0'],
             'details.*.subtotal' => ['required', 'numeric', 'min:0'],
+            'details.*.batch_number' => ['nullable', 'string', 'max:255'],
+            'details.*.expiration_date' => ['nullable', 'date'],
         ];
     }
 

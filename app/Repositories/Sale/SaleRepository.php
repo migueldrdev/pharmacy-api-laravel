@@ -42,6 +42,8 @@ class SaleRepository extends BaseRepository
         $details = $data['details'] ?? [];
         unset($data['details']);
 
+        $data['user_id'] = $this->getAuthenticatedUserId();
+
         // Let BaseRepository handle active, user_created, user_updated
         $sale = parent::create($data);
 
