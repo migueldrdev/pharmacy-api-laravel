@@ -81,5 +81,4 @@ class ProductService
     {
         return $this->repo->getActiveForCombo();
     }
-    }
 }
