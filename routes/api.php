@@ -43,6 +43,7 @@ Route::prefix('v1')->group(function () {
         Route::get('labs-combo', [LabController::class, 'combo']);
         Route::get('product-types-combo', [ProductTypeController::class, 'combo']);
         Route::get('product-presentations-combo', [ProductPresentationController::class, 'combo']);
+        Route::get('products-combo', [ProductController::class, 'combo']);
         Route::get('document-types-combo', [DocumentTypeController::class, 'combo']);
         Route::get('clients-combo', [ClientController::class, 'combo']);
         Route::get('suppliers-combo', [SupplierController::class, 'combo']);

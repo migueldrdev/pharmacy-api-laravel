@@ -69,15 +69,17 @@ class ProductService
         DB::beginTransaction();
 
         try {
-            // Decisión de negocio: Al hacer soft-delete, ¿eliminamos la imagen?
-            // Generalmente en soft-delete mantenemos la imagen por auditoría.
-            // Si quieres borrarla: if ($product->image) Storage::disk(config('filesystems.default'))->delete($product->image);
-            
             $this->repo->delete($product);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function getCombo()
+    {
+        return $this->repo->getActiveForCombo();
+    }
     }
 }

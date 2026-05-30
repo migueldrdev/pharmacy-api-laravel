@@ -109,4 +109,30 @@ class ProductController extends Controller
             );
         }
     }
+
+    /**
+     * Retorna productos activos en formato label/value para combos (selects).
+     */
+    public function combo()
+    {
+        try {
+            $products = $this->service->getCombo()->map(fn($p) => [
+                'label' => $p->name,
+                'value' => $p->id,
+            ])->values();
+
+            return ResponseHelper::success(
+                data: $products,
+                message: 'Consulta exitosa',
+                title: 'Listado de productos para combo'
+            );
+        } catch (Throwable $e) {
+            return ResponseHelper::error(
+                message: 'No se pudo listar para combo',
+                code: 500,
+                extra: ['error' => $e->getMessage()],
+                title: 'Error'
+            );
+        }
+    }
 }
