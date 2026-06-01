@@ -10,6 +10,7 @@ use App\Services\Product\ProductService;
 use App\Models\Product;
 use App\Http\Resources\Product\ProductResource;
 use Throwable;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -20,10 +21,17 @@ class ProductController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $products = $this->service->list();
+            $filters = $request->only([
+                'search', 'category_id', 'lab_id', 'product_type_id',
+                'product_presentation_id', 'storage_condition_id',
+                'stock_status', 'expiring_soon',
+            ]);
+            $perPage = (int) $request->input('per_page', 25);
+            $products = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: ProductResource::collection($products),
                 message: 'Consulta exitosa',

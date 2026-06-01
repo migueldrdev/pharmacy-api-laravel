@@ -12,6 +12,7 @@ use App\Http\Resources\Category\CategoryResource;
 use App\Http\Resources\Category\CategoryComboResource;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -22,10 +23,13 @@ class CategoryController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $categories = $this->service->list();
+            $filters = $request->only(['search']);
+            $perPage = (int) $request->input('per_page', 25);
+            $categories = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: CategoryResource::collection($categories),
                 message: 'Consulta exitosa',

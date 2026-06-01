@@ -21,6 +21,11 @@ class PurchaseService
         return $this->repo->all();
     }
 
+    public function listFiltered(array $filters = [], int $perPage = 25)
+    {
+        return $this->repo->filteredPaginate($filters, $perPage);
+    }
+
     public function create(array $data): Purchase
     {
         DB::beginTransaction();

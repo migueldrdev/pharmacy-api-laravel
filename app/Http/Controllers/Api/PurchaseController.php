@@ -9,8 +9,8 @@ use App\Http\Requests\Purchase\UpdatePurchaseRequest;
 use App\Services\Purchase\PurchaseService;
 use App\Models\Purchase;
 use App\Http\Resources\Purchase\PurchaseResource;
-use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Http\Request;
 
 class PurchaseController extends Controller
 {
@@ -21,10 +21,13 @@ class PurchaseController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $purchases = $this->service->list();
+            $filters = $request->only(['search', 'supplier_id', 'from', 'to']);
+            $perPage = (int) $request->input('per_page', 25);
+            $purchases = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: PurchaseResource::collection($purchases),
                 message: 'Consulta exitosa',

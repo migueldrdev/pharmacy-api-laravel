@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\PurchaseDocumentTypeController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\StorageConditionController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::prefix('v1')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index']);
         Route::get('user', [AuthController::class, 'user']);
         Route::post('logout', [AuthController::class, 'logout']);
 

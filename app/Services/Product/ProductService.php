@@ -81,4 +81,9 @@ class ProductService
     {
         return $this->repo->getActiveForCombo();
     }
+
+    public function listFiltered(array $filters = [], int $perPage = 25)
+    {
+        return $this->repo->filteredPaginate($filters, $perPage);
+    }
 }

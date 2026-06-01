@@ -12,6 +12,8 @@ use App\Http\Resources\Client\ClientResource;
 use App\Http\Resources\Client\ClientComboResource;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
@@ -22,10 +24,13 @@ class ClientController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $clients = $this->service->list();
+            $filters = $request->only(['search']);
+            $perPage = (int) $request->input('per_page', 25);
+            $clients = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: ClientResource::collection($clients),
                 message: 'Consulta exitosa',

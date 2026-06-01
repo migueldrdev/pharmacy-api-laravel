@@ -9,8 +9,8 @@ use App\Http\Requests\Sale\UpdateSaleRequest;
 use App\Services\Sale\SaleService;
 use App\Models\Sale;
 use App\Http\Resources\Sale\SaleResource;
-use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
@@ -21,10 +21,13 @@ class SaleController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $sales = $this->service->list();
+            $filters = $request->only(['search', 'client_id', 'from', 'to']);
+            $perPage = (int) $request->input('per_page', 25);
+            $sales = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: SaleResource::collection($sales),
                 message: 'Consulta exitosa',

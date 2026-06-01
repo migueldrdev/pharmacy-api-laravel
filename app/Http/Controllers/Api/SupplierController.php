@@ -12,6 +12,7 @@ use App\Http\Resources\Supplier\SupplierResource;
 use App\Http\Resources\Supplier\SupplierComboResource;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
+use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
@@ -22,10 +23,13 @@ class SupplierController extends Controller
         $this->service = $service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $suppliers = $this->service->list();
+            $filters = $request->only(['search']);
+            $perPage = (int) $request->input('per_page', 25);
+            $suppliers = $this->service->listFiltered($filters, $perPage);
+
             return ResponseHelper::success(
                 data: SupplierResource::collection($suppliers),
                 message: 'Consulta exitosa',

@@ -7,6 +7,7 @@ use App\Models\PurchaseDetail;
 use App\Models\Batch;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class PurchaseRepository extends BaseRepository
@@ -35,6 +36,35 @@ class PurchaseRepository extends BaseRepository
         return $this->model->with(['supplier', 'purchaseDocumentType', 'user', 'purchaseDetails.product'])
                            ->where('active', 1)
                            ->findOrFail($id, $columns);
+    }
+
+    public function filteredPaginate(array $filters = [], int $perPage = 25): LengthAwarePaginator
+    {
+        $query = $this->model->where('active', 1)
+            ->with(['supplier', 'purchaseDocumentType', 'details.product']);
+
+        if (!empty($filters['supplier_id'])) {
+            $query->where('supplier_id', $filters['supplier_id']);
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate('purchase_date', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $query->whereDate('purchase_date', '<=', $filters['to']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('supplier', fn($s) => $s->where('name', 'ILIKE', "%{$search}%"))
+                  ->orWhere('document_number', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('purchase_date', 'desc')
+                     ->orderBy('id', 'desc')
+                     ->paginate($perPage);
     }
 
     public function create(array $data): Purchase

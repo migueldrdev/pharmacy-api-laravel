@@ -7,6 +7,7 @@ use App\Models\SaleDetail;
 use App\Models\Batch;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\BaseRepository;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class SaleRepository extends BaseRepository
@@ -35,6 +36,35 @@ class SaleRepository extends BaseRepository
         return $this->model->with(['client', 'documentType', 'user', 'saleDetails.product'])
                            ->where('active', 1)
                            ->findOrFail($id, $columns);
+    }
+
+    public function filteredPaginate(array $filters = [], int $perPage = 25): LengthAwarePaginator
+    {
+        $query = $this->model->where('active', 1)
+            ->with(['client', 'documentType', 'details.product']);
+
+        if (!empty($filters['client_id'])) {
+            $query->where('client_id', $filters['client_id']);
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate('sale_date', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $query->whereDate('sale_date', '<=', $filters['to']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('client', fn($c) => $c->where('name', 'ILIKE', "%{$search}%"))
+                  ->orWhere('document_number', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('sale_date', 'desc')
+                     ->orderBy('id', 'desc')
+                     ->paginate($perPage);
     }
 
     public function create(array $data): Sale
