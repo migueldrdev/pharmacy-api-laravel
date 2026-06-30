@@ -16,10 +16,29 @@ class DemandPredictionService
         $this->aiAdapter = $aiAdapter;
     }
 
-    public function generatePredictions(): void
+    /**
+     * Generar predicciones de demanda
+     * 
+     * @param array|null $productIds IDs de productos específicos (null = todos)
+     * @return array Resultado de la operación
+     */
+    public function generatePredictions(?array $productIds = null): array
     {
+        $result = [
+            'total_products' => 0,
+            'predictions_generated' => 0,
+            'products_updated' => 0,
+        ];
+
         // 1. Recolectar datos relevantes
-        $products = Product::where('active', 1)->get();
+        $query = Product::where('active', 1);
+        
+        if ($productIds && count($productIds) > 0) {
+            $query->whereIn('id', $productIds);
+        }
+        
+        $products = $query->get();
+        $result['total_products'] = $products->count();
         
         $salesData = [];
         
@@ -43,15 +62,16 @@ class DemandPredictionService
 
         if (empty($salesData)) {
             Log::info('No hay productos para predecir.');
-            return;
+            return $result;
         }
 
         // 2. Enviar datos a la IA a través del adaptador agnóstico
         $predictions = $this->aiAdapter->predictDemand($salesData);
+        $result['predictions_generated'] = count($predictions ?? []);
 
         if (empty($predictions)) {
             Log::warning('La IA no devolvió predicciones válidas.');
-            return;
+            return $result;
         }
 
         // 3. Guardar los resultados
@@ -60,9 +80,12 @@ class DemandPredictionService
                 Product::where('id', $prediction['product_id'])->update([
                     'ai_suggestion' => $prediction['suggestion']
                 ]);
+                $result['products_updated']++;
             }
         }
         
-        Log::info('Predicciones de IA generadas y guardadas correctamente.');
+        Log::info('Predicciones de IA generadas y guardadas correctamente.', $result);
+        
+        return $result;
     }
 }
