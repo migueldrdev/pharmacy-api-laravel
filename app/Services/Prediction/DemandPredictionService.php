@@ -67,12 +67,29 @@ class DemandPredictionService
 
         // 2. Enviar datos a la IA a través del adaptador agnóstico
         $predictions = $this->aiAdapter->predictDemand($salesData);
-        $result['predictions_generated'] = count($predictions ?? []);
 
+        // Fallback heurístico si la IA no está disponible o no devolvió resultados
         if (empty($predictions)) {
-            Log::warning('La IA no devolvió predicciones válidas.');
-            return $result;
+            Log::warning('La IA no devolvió predicciones válidas. Aplicando algoritmo estadístico de respaldo.');
+            $predictions = [];
+            foreach ($salesData as $item) {
+                $stockNeeded = max(0, ($item['min_stock'] * 2) - $item['stock']);
+                if ($item['sold_last_30_days'] > 0 && $item['stock'] <= $item['min_stock']) {
+                    $suggestedQty = max($stockNeeded, (int) ceil($item['sold_last_30_days'] * 0.5));
+                    $suggestion = "Stock crítico. Se sugiere reabastecer " . $suggestedQty . " unidades según ventas del mes.";
+                } elseif ($item['stock'] <= $item['min_stock']) {
+                    $suggestion = "Stock bajo el mínimo. Reabastecimiento sugerido: " . max(1, $stockNeeded) . " unidades.";
+                } else {
+                    $suggestion = "Stock en nivel óptimo para la demanda estimada.";
+                }
+                $predictions[] = [
+                    'product_id' => $item['product_id'],
+                    'suggestion' => $suggestion,
+                ];
+            }
         }
+
+        $result['predictions_generated'] = count($predictions);
 
         // 3. Guardar los resultados
         foreach ($predictions as $prediction) {

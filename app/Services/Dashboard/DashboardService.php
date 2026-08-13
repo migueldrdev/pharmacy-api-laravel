@@ -51,9 +51,24 @@ class DashboardService
         for ($i = 3; $i >= 0; $i--) {
             $weekStart = Carbon::now()->subWeeks($i)->startOfWeek();
             $weekEnd = Carbon::now()->subWeeks($i)->endOfWeek();
-            $salesTrend[] = (float) Sale::where('active', 1)
+            
+            $sales = (float) Sale::where('active', 1)
                 ->whereBetween('sale_date', [$weekStart, $weekEnd])
                 ->sum('total');
+                
+            $expenses = (float) DB::table('purchase_details')
+                ->join('purchases', 'purchase_details.purchase_id', '=', 'purchases.id')
+                ->where('purchases.active', 1)
+                ->whereBetween('purchases.purchase_date', [$weekStart, $weekEnd])
+                ->sum('purchase_details.subtotal');
+
+            $period = ucfirst($weekStart->translatedFormat('d M')) . ' - ' . ucfirst($weekEnd->translatedFormat('d M'));
+
+            $salesTrend[] = [
+                'period' => $period,
+                'sales' => $sales,
+                'expenses' => $expenses,
+            ];
         }
 
         // Top categorías
@@ -67,7 +82,27 @@ class DashboardService
             ->orderByDesc('total')
             ->limit(5)
             ->get()
-            ->map(fn($row) => ['name' => $row->name, 'y' => (int) $row->total]);
+            ->map(fn($row) => ['name' => $row->name, 'total_sold' => (int) $row->total]);
+
+        // Top productos
+        $topProducts = DB::table('sale_details')
+            ->join('products', 'sale_details.product_id', '=', 'products.id')
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
+            ->where('sales.active', 1)
+            ->select(
+                'products.name',
+                DB::raw('SUM(sale_details.quantity) as units_sold'),
+                DB::raw('SUM(sale_details.subtotal) as revenue')
+            )
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('units_sold')
+            ->limit(5)
+            ->get()
+            ->map(fn($row) => [
+                'name' => $row->name,
+                'units_sold' => (int) $row->units_sold,
+                'revenue' => (float) $row->revenue,
+            ]);
 
         // Últimas ventas (10)
         $recentSales = Sale::with('client')
@@ -101,17 +136,24 @@ class DashboardService
             ]);
 
         return [
-            'daily_sales_total' => (float) $dailySales,
-            'daily_transactions' => $dailyTransactions,
-            'monthly_sales_total' => (float) $monthlySales,
-            'monthly_transactions' => $monthlyTransactions,
-            'total_products' => $totalProducts,
-            'low_stock_count' => $lowStockCount,
-            'expiring_soon_count' => $expiringSoonCount,
-            'sales_trend' => $salesTrend,
-            'top_categories' => $topCategories,
-            'recent_sales' => $recentSales,
-            'low_stock_products' => $lowStockProducts,
+            'kpis' => [
+                'daily_sales_total' => (float) $dailySales,
+                'daily_transactions' => $dailyTransactions,
+                'monthly_sales_total' => (float) $monthlySales,
+                'monthly_transactions' => $monthlyTransactions,
+                'total_products' => $totalProducts,
+                'low_stock_count' => $lowStockCount,
+                'expiring_soon_count' => $expiringSoonCount,
+            ],
+            'charts' => [
+                'sales_trend' => $salesTrend,
+                'top_categories' => $topCategories,
+                'top_products' => $topProducts,
+            ],
+            'tables' => [
+                'recent_sales' => $recentSales,
+                'low_stock_products' => $lowStockProducts,
+            ],
         ];
     }
 }
