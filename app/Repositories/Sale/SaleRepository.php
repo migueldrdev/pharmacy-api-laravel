@@ -109,10 +109,40 @@ class SaleRepository extends BaseRepository
                 $remainingQuantity -= $take;
             }
             
-            // Si remainingQuantity > 0 significa que se vendió sin stock de lote suficiente
-            // (podría lanzarse una excepción o permitirse saldo negativo según regla de negocio)
+            // Si remainingQuantity > 0, intentar auto-generar lote por defecto si el producto tiene stock general
             if ($remainingQuantity > 0) {
-                throw new \Exception("Stock insuficiente en lotes para el producto ID: {$detail['product_id']}");
+                $product = \App\Models\Product::find($detail['product_id']);
+                if ($product && $product->stock >= $remainingQuantity) {
+                    $autoBatch = Batch::create([
+                        'product_id' => $product->id,
+                        'batch_number' => 'LOT-DEF-' . sprintf('%05d', $product->id),
+                        'stock' => max(0, $product->stock - $detail['quantity']),
+                        'initial_stock' => max($product->stock, $detail['quantity']),
+                        'expiration_date' => now()->addYear()->format('Y-m-d'),
+                        'active' => 1,
+                        'user_created' => $this->getAuthenticatedUserId(),
+                    ]);
+
+                    DB::table('batch_sale_detail')->insert([
+                        'sale_detail_id' => $saleDetail->id,
+                        'batch_id' => $autoBatch->id,
+                        'quantity' => $remainingQuantity,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $product->decrement('stock', $detail['quantity']);
+                    $remainingQuantity = 0;
+                } else {
+                    $productName = $product ? $product->name : "ID {$detail['product_id']}";
+                    $available = $product ? $product->stock : 0;
+                    throw new \Exception("Stock insuficiente para '{$productName}'. Disponible: {$available} unidades.");
+                }
+            } else {
+                $product = \App\Models\Product::find($detail['product_id']);
+                if ($product) {
+                    $product->decrement('stock', $detail['quantity']);
+                }
             }
         }
 

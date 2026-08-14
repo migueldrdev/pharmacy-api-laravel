@@ -124,10 +124,24 @@ class ProductController extends Controller
     public function combo()
     {
         try {
-            $products = $this->service->getCombo()->map(fn($p) => [
-                'label' => $p->name,
-                'value' => $p->id,
-            ])->values();
+            $products = $this->service->getCombo()->map(function ($p) {
+                $stockStatus = $p->stock > 0 ? "Stock: {$p->stock}" : "AGOTADO";
+                $priceFormatted = number_format((float) $p->price, 2);
+                
+                return [
+                    'label' => "{$p->name} ({$p->code}) — S/ {$priceFormatted} | {$stockStatus}",
+                    'value' => $p->id,
+                    'meta' => [
+                        'code' => $p->code,
+                        'name' => $p->name,
+                        'price' => (float) $p->price,
+                        'stock' => (int) $p->stock,
+                        'min_stock' => (int) ($p->min_stock ?? 0),
+                        'is_low_stock' => $p->stock <= ($p->min_stock ?? 0),
+                        'expiration_date' => $p->expiration_date ? $p->expiration_date->format('Y-m-d') : null,
+                    ],
+                ];
+            })->values();
 
             return ResponseHelper::success(
                 data: $products,
