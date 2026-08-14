@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\BatchController;
 use App\Http\Controllers\Api\PredictionController;
 use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\StockReservationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -102,5 +103,10 @@ Route::prefix('v1')->group(function () {
         // Facturación PDF
         Route::get('sale/{sale}/invoice', [InvoiceController::class, 'saleInvoice']);
         Route::get('purchase/{purchase}/receipt', [InvoiceController::class, 'purchaseReceipt']);
+
+        // Reserva Temporal de Stock (Multi-Caja)
+        Route::post('stock-reservation/hold', [StockReservationController::class, 'hold']);
+        Route::post('stock-reservation/release', [StockReservationController::class, 'release']);
+        Route::get('stock-reservation/summary/{product}', [StockReservationController::class, 'summary']);
     });
 });
