@@ -38,7 +38,10 @@ class ProductRepository extends BaseRepository
 
     public function getActiveForCombo(): Collection
     {
-        return $this->model->where('active', 1)->select('id', 'name')->orderBy('name', 'asc')->get();
+        return $this->model->where('active', 1)
+            ->select('id', 'name', 'code', 'price', 'stock', 'min_stock', 'expiration_date')
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     public function filteredPaginate(array $filters = [], int $perPage = 25, array $columns = ['*']): LengthAwarePaginator
