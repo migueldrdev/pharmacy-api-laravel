@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             UserSeeder::class,
-            // Seeders de tablas sin dependencias complejas o que son maestras
+            // Seeders de tablas maestras
             DocumentTypeSeeder::class,
             CategorySeeder::class,
             LabSeeder::class,
@@ -26,13 +26,13 @@ class DatabaseSeeder extends Seeder
             ProductPresentationSeeder::class,
             SupplierSeeder::class,
             PurchaseDocumentTypeSeeder::class,
-            // Seeders que dependen de las tablas maestras
             ClientSeeder::class,
+            // Productos
             ProductSeeder::class,
-            // Seeders de transacciones (Ventas y Compras)
-            // Estos crearán sus respectivos detalles anidados
-            SaleSeeder::class,
+            // Transacciones: Compras primero (crean y abastecen lotes)
             PurchaseSeeder::class,
+            // Ventas después (descuentan lotes mediante FIFO)
+            SaleSeeder::class,
         ]);
     }
 }
