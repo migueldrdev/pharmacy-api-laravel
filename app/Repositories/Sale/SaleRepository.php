@@ -41,7 +41,7 @@ class SaleRepository extends BaseRepository
     public function filteredPaginate(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = $this->model->where('active', 1)
-            ->with(['client', 'documentType', 'details.product']);
+            ->with(['client', 'documentType', 'saleDetails.product']);
 
         if (!empty($filters['client_id'])) {
             $query->where('client_id', $filters['client_id']);
