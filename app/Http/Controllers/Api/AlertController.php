@@ -28,7 +28,7 @@ class AlertController extends Controller
             $products = Product::where('active', 1)
                 ->whereColumn('stock', '<=', 'min_stock')
                 ->with(['category:id,name', 'lab:id,name'])
-                ->select('id', 'name', 'code', 'stock', 'min_stock', 'cost_price', 'category_id', 'lab_id')
+                ->select('id', 'name', 'code', 'stock', 'min_stock', 'price', 'category_id', 'lab_id')
                 ->get()
                 ->map(function ($product) {
                     $stockPercentage = $product->min_stock > 0 
@@ -107,7 +107,7 @@ class AlertController extends Controller
                 ->get()
                 ->map(function ($batch) use ($days) {
                     $daysUntilExpiry = Carbon::now()->diffInDays(Carbon::parse($batch->expiration_date));
-                    $totalValue = $batch->stock * (DB::table('products')->where('id', $batch->product_id)->value('cost_price') ?? 0);
+                    $totalValue = $batch->stock * (DB::table('products')->where('id', $batch->product_id)->value('price') ?? 0);
 
                     return [
                         'id' => $batch->id,

@@ -267,7 +267,7 @@ class BatchController extends Controller
             $totalValue = DB::table('batches')
                 ->join('products', 'products.id', '=', 'batches.product_id')
                 ->where('batches.active', 1)
-                ->selectRaw('SUM(batches.stock * products.cost_price) as total_value')
+                ->selectRaw('SUM(batches.stock * products.price) as total_value')
                 ->value('total_value') ?? 0;
 
             return ResponseHelper::success(

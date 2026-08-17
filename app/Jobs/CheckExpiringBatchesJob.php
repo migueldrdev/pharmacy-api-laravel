@@ -29,7 +29,7 @@ class CheckExpiringBatchesJob implements ShouldQueue
             $dateLimit = Carbon::now()->addDays($days);
             $now = Carbon::now();
 
-            $expiringBatches = Batch::with('product:id,name,code,cost_price')
+            $expiringBatches = Batch::with('product:id,name,code,price')
                 ->join('products', 'products.id', '=', 'batches.product_id')
                 ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
                 ->where('batches.active', 1)
@@ -43,7 +43,7 @@ class CheckExpiringBatchesJob implements ShouldQueue
                     'products.id as product_id',
                     'products.name as product_name',
                     'products.code as product_code',
-                    'products.cost_price',
+                    'products.price',
                     'categories.name as category_name'
                 )
                 ->orderBy('batches.expiration_date')
@@ -51,7 +51,7 @@ class CheckExpiringBatchesJob implements ShouldQueue
 
             foreach ($expiringBatches as $batch) {
                 $daysUntilExpiry = Carbon::now()->diffInDays(Carbon::parse($batch->expiration_date));
-                $batchValue = (float) ($batch->stock * ($batch->cost_price ?? 0));
+                $batchValue = (float) ($batch->stock * ($batch->price ?? 0));
                 $totalValueAtRisk += $batchValue;
 
                 $severity = $daysUntilExpiry <= 7

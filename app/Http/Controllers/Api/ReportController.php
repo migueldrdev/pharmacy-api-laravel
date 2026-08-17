@@ -120,14 +120,14 @@ class ReportController extends Controller
             $totalProducts = Product::where('active', 1)->count();
             $totalStock = Product::where('active', 1)->sum('stock');
             $totalValue = Product::where('active', 1)
-                ->selectRaw('SUM(stock * cost_price) as total_value')
+                ->selectRaw('SUM(stock * price) as total_value')
                 ->value('total_value') ?? 0;
 
             // Productos con stock bajo
             $lowStockProducts = Product::where('active', 1)
                 ->whereColumn('stock', '<=', 'min_stock')
                 ->with('category:id,name')
-                ->select('id', 'name', 'stock', 'min_stock', 'cost_price')
+                ->select('id', 'name', 'stock', 'min_stock', 'price')
                 ->get();
 
             // Productos sin stock
@@ -144,7 +144,7 @@ class ReportController extends Controller
                     'categories.id',
                     'categories.name',
                     DB::raw('SUM(products.stock) as total_stock'),
-                    DB::raw('SUM(products.stock * products.cost_price) as total_value'),
+                    DB::raw('SUM(products.stock * products.price) as total_value'),
                     DB::raw('COUNT(products.id) as product_count')
                 )
                 ->groupBy('categories.id', 'categories.name')
@@ -235,7 +235,7 @@ class ReportController extends Controller
                 ->join('products', 'products.id', '=', 'sale_details.product_id')
                 ->where('sales.active', 1)
                 ->whereBetween('sales.sale_date', [$startDate, $endDate])
-                ->selectRaw('SUM(sale_details.quantity * products.cost_price) as total_cogs')
+                ->selectRaw('SUM(sale_details.quantity * products.price) as total_cogs')
                 ->value('total_cogs') ?? 0;
 
             // Utilidad bruta
@@ -263,8 +263,8 @@ class ReportController extends Controller
                     'categories.id',
                     'categories.name',
                     DB::raw('SUM(sale_details.subtotal) as revenue'),
-                    DB::raw('SUM(sale_details.quantity * products.cost_price) as cost'),
-                    DB::raw('SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.cost_price) as profit')
+                    DB::raw('SUM(sale_details.quantity * products.price) as cost'),
+                    DB::raw('SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.price) as profit')
                 )
                 ->groupBy('categories.id', 'categories.name')
                 ->orderByDesc('revenue')
@@ -292,9 +292,9 @@ class ReportController extends Controller
                     'products.id',
                     'products.name',
                     DB::raw('SUM(sale_details.subtotal) as revenue'),
-                    DB::raw('SUM(sale_details.quantity * products.cost_price) as cost'),
-                    DB::raw('SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.cost_price) as profit'),
-                    DB::raw('((SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.cost_price)) / NULLIF(SUM(sale_details.subtotal), 0)) * 100 as margin')
+                    DB::raw('SUM(sale_details.quantity * products.price) as cost'),
+                    DB::raw('SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.price) as profit'),
+                    DB::raw('((SUM(sale_details.subtotal) - SUM(sale_details.quantity * products.price)) / NULLIF(SUM(sale_details.subtotal), 0)) * 100 as margin')
                 )
                 ->groupBy('products.id', 'products.name')
                 ->orderByDesc('profit')
