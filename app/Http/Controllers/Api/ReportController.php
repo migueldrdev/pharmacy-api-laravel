@@ -138,7 +138,7 @@ class ReportController extends Controller
                 ->get();
 
             // Stock por categoría
-            $stockByCategory = Product::where('active', 1)
+            $stockByCategory = Product::where('products.active', 1)
                 ->join('categories', 'categories.id', '=', 'products.category_id')
                 ->select(
                     'categories.id',
