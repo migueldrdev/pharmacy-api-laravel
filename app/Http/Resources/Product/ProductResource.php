@@ -15,7 +15,6 @@ class ProductResource extends JsonResource
             'code' => $this->code,
             'description' => $this->description,
             'batch' => $this->batch,
-            'image' => $this->image,
             'concentration' => $this->concentration,
             'pharmaceutical_form' => $this->pharmaceutical_form,
             'administration_route' => $this->administration_route,
@@ -44,13 +43,12 @@ class ProductResource extends JsonResource
             'manufacturing_date' => $this->manufacturing_date ? $this->manufacturing_date->format('Y-m-d') : null,
             'requires_prescription' => (bool) $this->requires_prescription,
             'is_controlled' => (bool) $this->is_controlled,
-            // --- CAMBIO AQUÍ: storage_condition_id y storage_condition_label ---
             'storage_condition_id' => $this->storage_condition_id,
             'storage_condition_label' => $this->whenLoaded('storageCondition', function () {
                 return $this->storageCondition->label;
             }),
             'image' => $this->image ? Storage::disk(config('filesystems.default'))->url($this->image) : null,
-            // status
+            'ai_suggestion' => $this->ai_suggestion,
         ];
     }
 }
