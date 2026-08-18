@@ -100,7 +100,7 @@ class BatchController extends Controller
                 ->where('batch_sale_detail.batch_id', $batch->id)
                 ->select(
                     'batch_sale_detail.id',
-                    'batch_sale_detail.quantity_used',
+                    'batch_sale_detail.quantity as quantity_used',
                     'sale_details.quantity as sale_quantity',
                     'sale_details.price as sale_price',
                     'sales.sale_date',

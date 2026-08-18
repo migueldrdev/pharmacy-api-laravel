@@ -113,15 +113,21 @@ class SaleRepository extends BaseRepository
             if ($remainingQuantity > 0) {
                 $product = \App\Models\Product::find($detail['product_id']);
                 if ($product && $product->stock >= $remainingQuantity) {
-                    $autoBatch = Batch::create([
-                        'product_id' => $product->id,
-                        'batch_number' => 'LOT-DEF-' . sprintf('%05d', $product->id),
-                        'stock' => max(0, $product->stock - $detail['quantity']),
-                        'initial_stock' => max($product->stock, $detail['quantity']),
-                        'expiration_date' => now()->addYear()->format('Y-m-d'),
-                        'active' => 1,
-                        'user_created' => $this->getAuthenticatedUserId(),
-                    ]);
+                    $autoBatch = Batch::firstOrCreate(
+                        [
+                            'product_id' => $product->id,
+                            'batch_number' => 'LOT-DEF-' . sprintf('%05d', $product->id),
+                        ],
+                        [
+                            'stock' => 0,
+                            'initial_stock' => max($product->stock, $detail['quantity']),
+                            'expiration_date' => now()->addYear()->format('Y-m-d'),
+                            'active' => 1,
+                            'user_created' => $this->getAuthenticatedUserId(),
+                        ]
+                    );
+                    $autoBatch->stock = max(0, $product->stock - $detail['quantity']);
+                    $autoBatch->save();
 
                     DB::table('batch_sale_detail')->insert([
                         'sale_detail_id' => $saleDetail->id,

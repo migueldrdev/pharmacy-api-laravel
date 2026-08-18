@@ -5,6 +5,7 @@ namespace App\Repositories\Purchase;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Batch;
+use App\Models\Product;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -106,6 +107,9 @@ class PurchaseRepository extends BaseRepository
             unset($detail['batch_number'], $detail['expiration_date']);
 
             $purchase->purchaseDetails()->create($detail);
+
+            // Incrementar el stock general del producto
+            Product::where('id', $detail['product_id'])->increment('stock', $detail['quantity']);
         }
 
         return $purchase->load(['purchaseDetails.product']);
